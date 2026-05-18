@@ -1133,7 +1133,7 @@ async function selectOtherOrder(shopifyId, orderNumber) {
   // Update items from Supercycle for new order
   document.getElementById('rental-checklist').innerHTML = '<div class="other-orders-loading">Loading items...</div>';
   document.getElementById('other-orders-panel').classList.remove('visible');
-  document.getElementById('other-orders-btn').textContent = 'Order changed to ' + orderNumber + ' — Items don't match?';
+  document.getElementById('other-orders-btn').textContent = 'Order changed to ' + orderNumber + ' — Items don\'t match?';
 
   showLoading('Loading items from Supercycle...');
   try {
