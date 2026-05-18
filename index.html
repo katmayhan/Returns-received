@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Baboodle · Returns</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --red-mid: #fee2e2;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --bg: #f9fafb;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --text-2: #6b7280;
+    --text-3: #9ca3af;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .header-logo span { color: var(--red); }
+  .staff-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    color: var(--text-2);
+  }
+  .staff-chip:active { background: var(--border); }
+
+  /* ── Screen system ── */
+  .screen { display: none; padding: 16px; }
+  .screen.active { display: block; }
+
+  /* ── Staff picker ── */
+  .staff-screen {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    gap: 32px;
+  }
+  .staff-screen.active { display: flex; }
+  .staff-logo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .staff-logo span { color: var(--red); }
+  .staff-prompt {
+    text-align: center;
+  }
+  .staff-prompt h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .staff-prompt p { color: var(--text-2); font-size: 15px; }
+  .staff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .staff-btn {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    color: var(--text);
+  }
+  .staff-btn:active { background: var(--red-light); border-color: var(--red); color: var(--red); transform: scale(0.97); }
+
+  /* ── Scan screen ── */
+  .scan-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .scan-card-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .scan-card-header h2 { font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+  .scan-card-header p { font-size: 13px; color: var(--text-2); }
+  .scan-card-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  .scanner-target {
+    background: var(--bg);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 28px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .scanner-target:active, .scanner-target.focused {
+    border-color: var(--red);
+    background: var(--red-light);
+  }
+  .scanner-label { font-size: 16px; font-weight: 700; color: var(--text); }
+  .scanner-sub { font-size: 13px; color: var(--text-2); }
+
+  .scan-btn {
+    width: 100%;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.15s;
+  }
+  .scan-btn:active { opacity: 0.85; }
+  .scan-btn.secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-3);
+    font-size: 12px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .track-input {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+    text-transform: uppercase;
+  }
+  .track-input:focus { border-color: var(--red); }
+  .track-input::placeholder { color: var(--text-3); text-transform: none; font-family: 'DM Sans', sans-serif; }
+
+  /* ── Recent receipts ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    margin-bottom: 8px;
+    padding: 0 2px;
+  }
+  .receipt-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .receipt-row-left { flex: 1; min-width: 0; }
+  .receipt-order {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--red);
+    margin-bottom: 2px;
+  }
+  .receipt-customer { font-size: 14px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .receipt-items { font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .receipt-meta { text-align: right; flex-shrink: 0; }
+  .receipt-time { font-size: 12px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+  .receipt-by {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: var(--text-2);
+    margin-top: 4px;
+    display: inline-block;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-3);
+    font-size: 14px;
+  }
+
+  /* ── Confirm screen ── */
+  .confirm-screen.active { display: block; }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-2);
+    font-size: 14px;
+    font-weight: 500;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 16px;
+  }
+
+  .confirm-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .confirm-card-header {
+    background: var(--red);
+    padding: 16px;
+    color: white;
+  }
+  .confirm-card-header .label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+  .confirm-card-header h2 { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; }
+  .confirm-card-header .sub { font-size: 14px; opacity: 0.85; margin-top: 2px; }
+
+  .confirm-field {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .confirm-field:last-child { border-bottom: none; }
+  .confirm-field .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    margin-bottom: 4px;
+  }
+  .confirm-field .field-value { font-size: 15px; font-weight: 500; }
+  .confirm-field .field-value.mono { font-family: 'DM Mono', monospace; font-size: 14px; }
+
+  .items-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .item-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .item-pill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-3);
+    flex-shrink: 0;
+  }
+
+  .flag-banner {
+    margin: 0 16px 16px;
+    background: var(--amber-light);
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .flag-banner .flag-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .flag-banner .flag-text { font-size: 13px; font-weight: 600; color: #92400e; }
+
+  .confirm-btn {
+    width: 100%;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    margin-bottom: 10px;
+  }
+  .confirm-btn:active { opacity: 0.85; }
+  .confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Success screen ── */
+  .success-screen {
+    min-height: calc(100dvh - 57px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    gap: 24px;
+    text-align: center;
+  }
+  .success-screen.active { display: flex; }
+
+  .success-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--green-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .success-title { font-size: 24px; font-weight: 700; }
+  .success-sub { color: var(--text-2); font-size: 15px; }
+  .success-detail {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    width: 100%;
+    max-width: 320px;
+    text-align: left;
+  }
+  .success-detail .sd-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .success-detail .sd-row:last-child { border-bottom: none; }
+  .success-detail .sd-label { color: var(--text-2); }
+  .success-detail .sd-value { font-weight: 600; font-family: 'DM Mono', monospace; font-size: 13px; }
+
+  .next-btn {
+    width: 100%;
+    max-width: 320px;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* ── Error state ── */
+  .error-banner {
+    background: var(--red-light);
+    border: 1px solid var(--red-mid);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--red);
+    font-weight: 500;
+    margin-bottom: 12px;
+    display: none;
+  }
+  .error-banner.visible { display: block; }
+
+  /* ── Loading ── */
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .loading-overlay.visible { display: flex; }
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; color: var(--text-2); font-weight: 500; }
+
+  /* ── Camera modal ── */
+  .camera-modal {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 300;
+    display: none;
+    flex-direction: column;
+  }
+  .camera-modal.visible { display: flex; }
+  #camera-video {
+    flex: 1;
+    width: 100%;
+    object-fit: cover;
+  }
+  .camera-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .scan-frame {
+    width: 240px;
+    height: 120px;
+    border: 2px solid white;
+    border-radius: 8px;
+    position: relative;
+  }
+  .scan-frame::before, .scan-frame::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: var(--red);
+    border-style: solid;
+  }
+  .scan-frame::before { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 8px 0 0 0; }
+  .scan-frame::after { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 8px 0; }
+  .scan-hint {
+    color: white;
+    font-size: 14px;
+    margin-top: 20px;
+    opacity: 0.8;
+    font-weight: 500;
+  }
+  .camera-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+  }
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--red);
+    animation: scanline 1.5s ease-in-out infinite;
+  }
+  @keyframes scanline {
+    0% { top: 10%; opacity: 1; }
+    50% { top: 85%; opacity: 1; }
+    100% { top: 10%; opacity: 1; }
+  }
+
+  /* -- Item checklist -- */
+  .checklist-intro {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 12px;
+  }
+  .rental-item {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .rental-item.checked {
+    border-color: var(--green);
+    background: var(--green-light);
+  }
+  .rental-item.already-received {
+    border-color: var(--border);
+    background: var(--bg);
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .rental-checkbox {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+    transition: all 0.15s;
+  }
+  .rental-item.checked .rental-checkbox {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+  .rental-item-info { flex: 1; min-width: 0; }
+  .rental-item-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .rental-item-sub { font-size: 12px; color: var(--text-2); }
+  .rental-item-badge {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    padding: 3px 7px;
+    border-radius: 4px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+  .rental-item.already-received .rental-item-badge {
+    background: var(--green-light);
+    color: var(--green);
+    border-color: var(--green);
+  }
+  .no-rentals {
+    background: var(--amber-light);
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Looking up return…</div>
+</div>
+
+<!-- Camera modal -->
+<div class="camera-modal" id="camera-modal">
+  <video id="camera-video" autoplay playsinline muted></video>
+  <div class="camera-overlay">
+    <div class="scan-frame">
+      <div class="scan-line"></div>
+    </div>
+    <div class="scan-hint">Hold barcode within frame</div>
+  </div>
+  <button class="camera-close" id="camera-close">✕</button>
+</div>
+
+<!-- Header -->
+<div class="header" id="main-header" style="display:none">
+  <div class="header-logo">Baboodle <span>·</span> Returns</div>
+  <div class="staff-chip" id="staff-chip-btn">–</div>
+</div>
+
+<!-- SCREEN: Staff picker -->
+<div class="screen staff-screen active" id="screen-staff">
+  <div class="staff-logo">Baboodle <span>·</span> Returns</div>
+  <div class="staff-prompt">
+    <h2>Who are you?</h2>
+    <p>Select your initials to get started</p>
+  </div>
+  <div class="staff-grid">
+    <button class="staff-btn" onclick="selectStaff('KHP')">KHP</button>
+    <button class="staff-btn" onclick="selectStaff('DH')">DH</button>
+    <button class="staff-btn" onclick="selectStaff('NM')">NM</button>
+    <button class="staff-btn" onclick="selectStaff('SG')">SG</button>
+    <button class="staff-btn" onclick="selectStaff('AM')" style="grid-column:1/-1">AM</button>
+  </div>
+</div>
+
+<!-- SCREEN: Scan -->
+<div class="screen" id="screen-scan">
+  <div class="scan-card">
+    <div class="scan-card-header">
+      <h2>Log a return</h2>
+      <p>Scan or enter the Royal Mail tracking number</p>
+    </div>
+    <div class="scan-card-body">
+      <div class="scanner-target">
+        <svg width="36" height="36" fill="none" stroke="#dc2626" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 5h2M7 5h1M3 5v2M21 5h-2M17 5h-1M21 5v2M3 19h2M7 19h1M3 19v-2M21 19h-2M17 19h-1M21 19v-2"/><line x1="4" y1="12" x2="20" y2="12" stroke="#dc2626" stroke-width="2"/></svg>
+        <div class="scanner-label">Ready to scan</div>
+        <div class="scanner-sub">Point scanner at the Royal Mail barcode and pull trigger</div>
+      </div>
+      <input class="track-input" id="track-input" type="text" placeholder="Or type tracking number manually" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="error-banner" id="scan-error">Unable to match this tracking number. Please check and try again.</div>
+    </div>
+  </div>
+
+  <div class="section-label">Received today</div>
+  <div id="recent-list">
+    <div class="empty-state">No receipts logged today yet</div>
+  </div>
+</div>
+
+<!-- SCREEN: Confirm -->
+<div class="screen" id="screen-confirm">
+  <button class="back-btn" onclick="goBack()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back
+  </button>
+
+  <div class="confirm-card" id="confirm-card">
+    <div class="confirm-card-header">
+      <div class="label">Return found</div>
+      <h2 id="confirm-order">-</h2>
+      <div class="sub" id="confirm-tracking">-</div>
+    </div>
+    <div class="confirm-field">
+      <div class="field-label">Customer</div>
+      <div class="field-value" id="confirm-customer">-</div>
+    </div>
+    <div class="confirm-field">
+      <div class="field-label">Postcode</div>
+      <div class="field-value mono" id="confirm-postcode">-</div>
+    </div>
+  </div>
+
+  <div id="match-warning" style="display:none;margin-bottom:16px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;">
+    &#9888; Order number and email don't match. Please manually confirm in Supercycle before confirming receipt.
+  </div>
+
+  <div class="section-label" style="margin-top:8px">Items on this order</div>
+  <div class="checklist-intro">Tick each item you are physically receiving in this box</div>
+  <div id="rental-checklist"></div>
+
+  <button class="confirm-btn" id="confirm-btn" onclick="confirmReceipt()" style="margin-top:8px">
+    Confirm receipt
+  </button>
+  <div class="error-banner" id="confirm-error">Failed to log receipt. Please try again.</div>
+</div>
+
+<!-- SCREEN: Success -->
+<div class="screen success-screen" id="screen-success">
+  <div class="success-icon">✓</div>
+  <div>
+    <div class="success-title">Return received</div>
+    <div class="success-sub" id="success-sub">Logged successfully</div>
+  </div>
+  <div class="success-detail">
+    <div class="sd-row"><span class="sd-label">Order</span><span class="sd-value" id="s-order">–</span></div>
+    <div class="sd-row"><span class="sd-label">Customer</span><span class="sd-value" id="s-customer">–</span></div>
+    <div class="sd-row"><span class="sd-label">Received by</span><span class="sd-value" id="s-by">–</span></div>
+    <div class="sd-row"><span class="sd-label">Time</span><span class="sd-value" id="s-time">–</span></div>
+  </div>
+  <button class="next-btn" onclick="scanAnother()">Scan another return</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function() {
+
+const SUPABASE_URL = 'https://rousljiuoswvbszgfmys.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdXNsaml1b3N3dmJzemdmbXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTkwMDYsImV4cCI6MjA5MTEzNTAwNn0.pIz0ESqkXP6wqjI4H0sOOR-5diZTSQzSh9bksRLzaI0';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentStaff = null;
+let currentReturn = null; // { rm, shopifyOrder, matchConfidence, rentals }
+
+function normaliseOrder(val) {
+  if (!val) return '';
+  return String(val).replace(/[^0-9]/g, '').replace(/^0+/, '');
+}
+
+// ---- Supercycle proxy call ----
+async function supercycle(action, payload) {
+  const res = await fetch('/.netlify/functions/supercycle', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, payload })
+  });
+  if (!res.ok) throw new Error('Supercycle call failed: ' + res.status);
+  return res.json();
+}
+
+// ---- Init ----
+const stored = localStorage.getItem('bbl_staff');
+if (stored) { currentStaff = stored; showApp(); }
+
+function selectStaff(initials) {
+  currentStaff = initials;
+  localStorage.setItem('bbl_staff', initials);
+  showApp();
+}
+window.selectStaff = selectStaff;
+
+function showApp() {
+  document.getElementById('main-header').style.display = 'flex';
+  document.getElementById('staff-chip-btn').textContent = currentStaff;
+  showScreen('scan');
+  loadRecent();
+}
+
+document.getElementById('staff-chip-btn').addEventListener('click', () => {
+  if (confirm('Switch staff member?')) {
+    localStorage.removeItem('bbl_staff');
+    currentStaff = null;
+    document.getElementById('main-header').style.display = 'none';
+    showScreen('staff');
+  }
+});
+
+// ---- Screens ----
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'scan') {
+    setTimeout(() => { const i = document.getElementById('track-input'); if (i) i.focus(); }, 50);
+  }
+}
+
+function goBack() {
+  showScreen('scan');
+  document.getElementById('scan-error').classList.remove('visible');
+  document.getElementById('track-input').value = '';
+}
+window.goBack = goBack;
+
+// ---- Scanner input ----
+const trackInput = document.getElementById('track-input');
+
+document.querySelector('.scanner-target').addEventListener('click', () => trackInput.focus());
+trackInput.addEventListener('focus', () => document.querySelector('.scanner-target').classList.add('focused'));
+trackInput.addEventListener('blur', () => document.querySelector('.scanner-target').classList.remove('focused'));
+trackInput.addEventListener('keydown', e => { if (e.key === 'Enter') lookupTracking(); });
+
+let scanDebounce = null;
+trackInput.addEventListener('input', () => {
+  clearTimeout(scanDebounce);
+  scanDebounce = setTimeout(() => {
+    if (trackInput.value.trim().length >= 8) lookupTracking();
+  }, 400);
+});
+
+// ---- Lookup ----
+async function lookupTracking() {
+  const raw = trackInput.value.trim().toUpperCase();
+  if (!raw) return;
+  clearTimeout(scanDebounce);
+
+  document.getElementById('scan-error').classList.remove('visible');
+  showLoading('Looking up return...');
+
+  try {
+    // Step 1: royal_mail record
+    const { data: rm, error: rmErr } = await db
+      .from('royal_mail')
+      .select('tracking_number, order_number, customer_name, customer_email, customer_postcode, status, received_at, received_by')
+      .eq('tracking_number', raw)
+      .maybeSingle();
+
+    if (rmErr) throw rmErr;
+
+    if (!rm) {
+      hideLoading();
+      document.getElementById('scan-error').textContent = 'Tracking number not found. Please check and try again.';
+      document.getElementById('scan-error').classList.add('visible');
+      return;
+    }
+
+    if (rm.received_at) {
+      hideLoading();
+      const t = new Date(rm.received_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+      document.getElementById('scan-error').textContent = 'Already received — order ' + rm.order_number + ' (' + t + ' by ' + (rm.received_by || 'unknown') + ')';
+      document.getElementById('scan-error').classList.add('visible');
+      return;
+    }
+
+    // Step 2: shopify_orders by email
+    const { data: byEmail } = await db
+      .from('shopify_orders')
+      .select('id, order_name, email, full_name, postcode, line_items')
+      .eq('email', rm.customer_email);
+
+    let shopifyOrder = null;
+    let matchConfidence = 'none';
+    const normRm = normaliseOrder(rm.order_number);
+
+    if (byEmail && byEmail.length > 0) {
+      const fullMatch = byEmail.find(r => normaliseOrder(r.order_name) === normRm);
+      shopifyOrder = fullMatch || byEmail[0];
+      matchConfidence = fullMatch ? 'full' : 'partial';
+    } else {
+      const { data: allOrders } = await db.from('shopify_orders').select('id, order_name, email, full_name, postcode, line_items');
+      if (allOrders) {
+        const orderMatch = allOrders.find(r => normaliseOrder(r.order_name) === normRm);
+        if (orderMatch) { shopifyOrder = orderMatch; matchConfidence = 'partial'; }
+      }
+    }
+
+    // Step 3: Supercycle rentals for this order
+    showLoading('Loading items from Supercycle...');
+    let rentals = [];
+    const orderNameForLookup = (shopifyOrder && shopifyOrder.order_name) || rm.order_number;
+    if (orderNameForLookup) {
+      try {
+        const scData = await supercycle('getRentals', { orderName: orderNameForLookup });
+        rentals = scData.data || [];
+      } catch(e) {
+        console.warn('Supercycle lookup failed:', e);
+      }
+    }
+
+    currentReturn = { rm, shopifyOrder, matchConfidence, rentals };
+    hideLoading();
+    showConfirm(currentReturn);
+
+  } catch(e) {
+    hideLoading();
+    console.error(e);
+    document.getElementById('scan-error').textContent = 'Something went wrong. Please try again.';
+    document.getElementById('scan-error').classList.add('visible');
+  }
+}
+window.lookupTracking = lookupTracking;
+
+// ---- Confirm screen ----
+function showConfirm({ rm, shopifyOrder, matchConfidence, rentals }) {
+  document.getElementById('confirm-order').textContent = rm.order_number || (shopifyOrder && shopifyOrder.order_name) || '--';
+  document.getElementById('confirm-tracking').textContent = rm.tracking_number;
+  document.getElementById('confirm-customer').textContent = rm.customer_name || (shopifyOrder && shopifyOrder.full_name) || '--';
+  document.getElementById('confirm-postcode').textContent = rm.customer_postcode || (shopifyOrder && shopifyOrder.postcode) || '--';
+
+  document.getElementById('match-warning').style.display = matchConfidence === 'partial' ? 'block' : 'none';
+
+  // Build rental checklist
+  const checklist = document.getElementById('rental-checklist');
+  checklist.innerHTML = '';
+
+  if (rentals.length === 0) {
+    checklist.innerHTML = '<div class="no-rentals">No active rentals found in Supercycle for this order. Please check manually before confirming.</div>';
+  } else {
+    rentals.forEach(rental => {
+      const alreadyReceived = rental.receivalStatus === 'complete';
+      const title = (rental.item && rental.item.productTitle) || rental.shopifyOrderName || 'Item';
+      const variant = (rental.item && rental.item.variantTitle) ? rental.item.variantTitle : '';
+      const methodType = rental.methodType || '';
+
+      const div = document.createElement('div');
+      div.className = 'rental-item' + (alreadyReceived ? ' already-received' : '');
+      div.dataset.rentalId = rental.id;
+      div.dataset.returnOrderId = rental.returnOrderId || '';
+      div.dataset.checked = 'false';
+
+      div.innerHTML = `
+        <div class="rental-checkbox">${alreadyReceived ? '\u2713' : ''}</div>
+        <div class="rental-item-info">
+          <div class="rental-item-title">${title}</div>
+          ${variant ? '<div class="rental-item-sub">' + variant + '</div>' : ''}
+        </div>
+        <div class="rental-item-badge">${alreadyReceived ? 'Received' : methodType}</div>
+      `;
+
+      if (!alreadyReceived) {
+        div.addEventListener('click', () => toggleRentalItem(div));
+      }
+
+      checklist.appendChild(div);
+    });
+  }
+
+  document.getElementById('confirm-error').classList.remove('visible');
+  showScreen('confirm');
+}
+
+function toggleRentalItem(el) {
+  const checked = el.dataset.checked === 'true';
+  el.dataset.checked = checked ? 'false' : 'true';
+  el.classList.toggle('checked', !checked);
+  el.querySelector('.rental-checkbox').textContent = checked ? '' : '\u2713';
+}
+
+// ---- Confirm receipt ----
+async function confirmReceipt() {
+  if (!currentReturn || !currentStaff) return;
+
+  const checkedItems = Array.from(document.querySelectorAll('.rental-item[data-checked="true"]'));
+  if (checkedItems.length === 0) {
+    document.getElementById('confirm-error').textContent = 'Please tick at least one item to confirm receipt.';
+    document.getElementById('confirm-error').classList.add('visible');
+    return;
+  }
+
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Logging...';
+  document.getElementById('confirm-error').classList.remove('visible');
+
+  const now = new Date().toISOString();
+  const errors = [];
+
+  // Fire Supercycle for each ticked item
+  for (const item of checkedItems) {
+    const rentalId = parseInt(item.dataset.rentalId);
+    const existingReturnOrderId = item.dataset.returnOrderId ? parseInt(item.dataset.returnOrderId) : null;
+    try {
+      if (existingReturnOrderId) {
+        // Update existing return order to received
+        await supercycle('updateReturn', {
+          returnOrderId: existingReturnOrderId,
+          returnLineIds: []
+        });
+      } else {
+        // Create new return order marked as received
+        await supercycle('createReturn', { rentalId });
+      }
+    } catch(e) {
+      console.error('Supercycle error for rental', rentalId, e);
+      errors.push(rentalId);
+    }
+  }
+
+  // Write to Supabase regardless (Supercycle errors are non-blocking)
+  try {
+    await db.from('royal_mail').update({
+      received_at: now,
+      received_by: currentStaff,
+      status: 'received'
+    }).eq('tracking_number', currentReturn.rm.tracking_number);
+  } catch(e) {
+    console.error('Supabase write error', e);
+  }
+
+  const rm = currentReturn.rm;
+  const order = currentReturn.shopifyOrder;
+  const timeStr = new Date(now).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  document.getElementById('s-order').textContent = rm.order_number || (order && order.order_name) || '--';
+  document.getElementById('s-customer').textContent = rm.customer_name || (order && order.full_name) || '--';
+  document.getElementById('s-by').textContent = currentStaff;
+  document.getElementById('s-time').textContent = timeStr;
+  document.getElementById('success-sub').textContent = checkedItems.length + ' item' + (checkedItems.length > 1 ? 's' : '') + ' marked received';
+
+  if (errors.length > 0) {
+    document.getElementById('success-sub').textContent += ' (Supercycle sync failed for ' + errors.length + ' item — please update manually)';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Confirm receipt';
+  showScreen('success');
+  loadRecent();
+}
+window.confirmReceipt = confirmReceipt;
+
+function scanAnother() {
+  currentReturn = null;
+  trackInput.value = '';
+  showScreen('scan');
+}
+window.scanAnother = scanAnother;
+
+// ---- Recent receipts ----
+async function loadRecent() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const { data } = await db
+    .from('royal_mail')
+    .select('tracking_number, order_number, customer_name, received_at, received_by')
+    .gte('received_at', today.toISOString())
+    .not('received_at', 'is', null)
+    .order('received_at', { ascending: false })
+    .limit(20);
+
+  const el = document.getElementById('recent-list');
+  if (!data || data.length === 0) {
+    el.innerHTML = '<div class="empty-state">No receipts logged today yet</div>';
+    return;
+  }
+  el.innerHTML = data.map(r => `
+    <div class="receipt-row">
+      <div class="receipt-row-left">
+        <div class="receipt-order">${r.order_number || '--'}</div>
+        <div class="receipt-customer">${r.customer_name || '--'}</div>
+        <div class="receipt-items">${r.tracking_number}</div>
+      </div>
+      <div class="receipt-meta">
+        <div class="receipt-time">${new Date(r.received_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
+        <span class="receipt-by">${r.received_by}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---- Loading ----
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text || 'Loading...';
+  document.getElementById('loading').classList.add('visible');
+}
+function hideLoading() {
+  document.getElementById('loading').classList.remove('visible');
+}
+
+})();
+</script>
+</body>
+</html>
