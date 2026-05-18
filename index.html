@@ -717,14 +717,13 @@
   <div class="staff-logo">Baboodle <span>·</span> Returns</div>
   <div class="staff-prompt">
     <h2>Who are you?</h2>
-    <p>Select your initials to get started</p>
+    <p>Enter your name to get started</p>
   </div>
-  <div class="staff-grid">
-    <button class="staff-btn" onclick="selectStaff('KHP')">KHP</button>
-    <button class="staff-btn" onclick="selectStaff('DH')">DH</button>
-    <button class="staff-btn" onclick="selectStaff('NM')">NM</button>
-    <button class="staff-btn" onclick="selectStaff('SG')">SG</button>
-    <button class="staff-btn" onclick="selectStaff('AM')" style="grid-column:1/-1">AM</button>
+  <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px;">
+    <input id="staff-name-input" type="text" placeholder="Your name" autocomplete="off"
+      style="width:100%;border:2px solid var(--border);border-radius:var(--radius-sm);padding:16px;font-family:'DM Sans',sans-serif;font-size:16px;outline:none;transition:border-color 0.15s;"
+      onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+    <button class="scan-btn" onclick="confirmStaffName()" style="margin:0">Start</button>
   </div>
 </div>
 
@@ -736,12 +735,22 @@
       <p>Scan or enter the Royal Mail tracking number</p>
     </div>
     <div class="scan-card-body">
-      <div class="scanner-target">
+      <!-- Hidden input captures scanner without opening keyboard -->
+      <input id="track-input" type="text" autocomplete="off" autocorrect="off" spellcheck="false"
+        style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;">
+
+      <div class="scanner-target" id="scanner-target-el">
         <svg width="36" height="36" fill="none" stroke="#dc2626" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 5h2M7 5h1M3 5v2M21 5h-2M17 5h-1M21 5v2M3 19h2M7 19h1M3 19v-2M21 19h-2M17 19h-1M21 19v-2"/><line x1="4" y1="12" x2="20" y2="12" stroke="#dc2626" stroke-width="2"/></svg>
         <div class="scanner-label">Ready to scan</div>
         <div class="scanner-sub">Point scanner at the Royal Mail barcode and pull trigger</div>
       </div>
-      <input class="track-input" id="track-input" type="text" placeholder="Or type tracking number manually" autocomplete="off" autocorrect="off" spellcheck="false">
+
+      <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+        <input id="manual-input" type="text" placeholder="Type tracking number manually"
+          autocomplete="off" autocorrect="off" spellcheck="false"
+          class="track-input" style="flex:1;margin:0;">
+        <button class="scan-btn" onclick="lookupManual()" style="width:auto;padding:14px 16px;margin:0;flex-shrink:0;">Go</button>
+      </div>
       <div class="error-banner" id="scan-error">Unable to match this tracking number. Please check and try again.</div>
     </div>
   </div>
@@ -847,12 +856,20 @@ async function supercycle(action, payload) {
 const stored = localStorage.getItem('bbl_staff');
 if (stored) { currentStaff = stored; showApp(); }
 
-function selectStaff(initials) {
-  currentStaff = initials;
-  localStorage.setItem('bbl_staff', initials);
+function confirmStaffName() {
+  const name = document.getElementById('staff-name-input').value.trim();
+  if (!name) return;
+  currentStaff = name;
+  localStorage.setItem('bbl_staff', name);
   showApp();
 }
-window.selectStaff = selectStaff;
+window.confirmStaffName = confirmStaffName;
+
+// Allow Enter key on name input
+setTimeout(() => {
+  const nameInput = document.getElementById('staff-name-input');
+  if (nameInput) nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') confirmStaffName(); });
+}, 100);
 
 function showApp() {
   document.getElementById('main-header').style.display = 'flex';
@@ -874,40 +891,63 @@ document.getElementById('staff-chip-btn').addEventListener('click', () => {
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
-  if (name === 'scan') {
-    setTimeout(() => { const i = document.getElementById('track-input'); if (i) i.focus(); }, 50);
-  }
 }
 
 function goBack() {
   showScreen('scan');
   document.getElementById('scan-error').classList.remove('visible');
   document.getElementById('track-input').value = '';
+  document.getElementById('manual-input').value = '';
   otherOrdersLoaded = false;
 }
 window.goBack = goBack;
 
 // ---- Scanner input ----
-const trackInput = document.getElementById('track-input');
+const trackInput = document.getElementById('track-input'); // hidden, captures scanner
+const manualInput = document.getElementById('manual-input'); // visible, for manual entry
 
-document.querySelector('.scanner-target').addEventListener('click', () => trackInput.focus());
-trackInput.addEventListener('focus', () => document.querySelector('.scanner-target').classList.add('focused'));
-trackInput.addEventListener('blur', () => document.querySelector('.scanner-target').classList.remove('focused'));
-trackInput.addEventListener('keydown', e => { if (e.key === 'Enter') lookupTracking(); });
+// Tap scanner target to focus hidden input (ready for scanner without keyboard)
+document.getElementById('scanner-target-el').addEventListener('click', () => {
+  trackInput.focus({ preventScroll: true });
+  document.getElementById('scanner-target-el').classList.add('focused');
+});
 
+// Scanner fires into hidden input via debounce
 let scanDebounce = null;
 trackInput.addEventListener('input', () => {
   clearTimeout(scanDebounce);
   scanDebounce = setTimeout(() => {
-    if (trackInput.value.trim().length >= 8) lookupTracking();
-  }, 400);
+    const val = trackInput.value.trim();
+    if (val.length >= 8) {
+      lookupTracking(val);
+      trackInput.value = '';
+    }
+  }, 300);
+});
+trackInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    clearTimeout(scanDebounce);
+    const val = trackInput.value.trim();
+    if (val.length >= 2) { lookupTracking(val); trackInput.value = ''; }
+  }
 });
 
+// Manual input - Enter key or Go button
+manualInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') lookupManual();
+});
+
+function lookupManual() {
+  const val = manualInput.value.trim().toUpperCase();
+  if (!val) return;
+  lookupTracking(val);
+}
+window.lookupManual = lookupManual;
+
 // ---- Lookup ----
-async function lookupTracking() {
-  const raw = trackInput.value.trim().toUpperCase();
+async function lookupTracking(raw) {
+  raw = (raw || '').trim().toUpperCase();
   if (!raw) return;
-  clearTimeout(scanDebounce);
 
   document.getElementById('scan-error').classList.remove('visible');
   showLoading('Looking up return...');
@@ -937,46 +977,45 @@ async function lookupTracking() {
       return;
     }
 
-    // Step 2: shopify_orders from baboodle-erp by email
-    const { data: byEmail } = await erpDb
-      .from('shopify_orders')
-      .select('id, order_number, customer_email, fulfillment_status')
-      .eq('customer_email', rm.customer_email)
-      .gt('id', 1000000); // exclude legacy non-Shopify IDs
-
-    let shopifyOrder = null;
-    let matchConfidence = 'none';
+    // Steps 2 & 3 in parallel: shopify lookup + order-number-based Supercycle lookup
+    showLoading('Loading order details...');
     const normRm = normaliseOrder(rm.order_number);
 
-    if (byEmail && byEmail.length > 0) {
-      const fullMatch = byEmail.find(r => normaliseOrder(r.order_number) === normRm);
-      shopifyOrder = fullMatch || byEmail[0];
-      matchConfidence = fullMatch ? 'full' : 'partial';
-    } else {
-      // Try order number only
-      const { data: byOrderRows } = await erpDb
-        .from('shopify_orders')
-        .select('id, order_number, customer_email, fulfillment_status')
+    const [erpResult, scByOrderResult] = await Promise.all([
+      // ERP: try exact order number first
+      erpDb.from('shopify_orders')
+        .select('id, order_number, customer_email, fulfillment_status, tags')
         .eq('order_number', rm.order_number)
-        .gt('id', 1000000);
-      if (byOrderRows && byOrderRows.length > 0) {
-        shopifyOrder = byOrderRows[0];
-        matchConfidence = 'partial';
-      }
+        .gt('id', 1000000)
+        .maybeSingle(),
+      // Supercycle: search by order name in parallel
+      supercycle('getRentals', { orderName: rm.order_number }).catch(() => null)
+    ]);
+
+    let shopifyOrder = erpResult.data || null;
+    let matchConfidence = shopifyOrder ? 'full' : 'none';
+
+    // If no exact order number match, fall back to email match
+    if (!shopifyOrder && rm.customer_email) {
+      const { data: byEmail } = await erpDb
+        .from('shopify_orders')
+        .select('id, order_number, customer_email, fulfillment_status, tags')
+        .eq('customer_email', rm.customer_email)
+        .gt('id', 1000000)
+        .not('tags', 'ilike', '%Recurring order%')
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (byEmail) { shopifyOrder = byEmail; matchConfidence = 'partial'; }
     }
 
-    // Step 3: Supercycle rentals for this order
-    showLoading('Loading items from Supercycle...');
-    let rentals = [];
-    const shopifyNumericId = shopifyOrder && shopifyOrder.id;
-    const orderNameForLookup = rm.order_number;
-    if (shopifyNumericId || orderNameForLookup) {
+    // Get rentals — if we have a numeric Shopify ID now, re-fetch with it for accuracy
+    let rentals = (scByOrderResult && scByOrderResult.data) || [];
+    if (shopifyOrder && shopifyOrder.id && rentals.length === 0) {
       try {
-        const scData = await supercycle('getRentals', { shopifyOrderId: shopifyNumericId, orderName: orderNameForLookup });
+        const scData = await supercycle('getRentals', { shopifyOrderId: shopifyOrder.id, orderName: rm.order_number });
         rentals = scData.data || [];
-      } catch(e) {
-        console.warn('Supercycle lookup failed:', e);
-      }
+      } catch(e) {}
     }
 
     currentReturn = { rm, shopifyOrder, matchConfidence, rentals };
@@ -1249,6 +1288,7 @@ function scanAnother() {
   currentReturn = null;
   otherOrdersLoaded = false;
   trackInput.value = '';
+  document.getElementById('manual-input').value = '';
   showScreen('scan');
 }
 window.scanAnother = scanAnother;
