@@ -546,6 +546,67 @@
     100% { top: 10%; opacity: 1; }
   }
 
+  /* -- Other orders panel -- */
+  .other-orders-btn {
+    width: 100%;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .other-orders-btn:active { background: var(--bg); }
+  .other-orders-panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .other-orders-panel.visible { display: block; }
+  .other-order-row {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .other-order-row:last-child { border-bottom: none; }
+  .other-order-row:active { background: var(--bg); }
+  .other-order-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--red);
+  }
+  .other-order-items {
+    font-size: 12px;
+    color: var(--text-2);
+    margin-top: 2px;
+  }
+  .other-order-select {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+  .other-orders-loading {
+    padding: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-3);
+  }
+
   /* -- Item checklist -- */
   .checklist-intro {
     font-size: 13px;
@@ -722,6 +783,13 @@
   <div class="checklist-intro">Tick each item you are physically receiving in this box</div>
   <div id="rental-checklist"></div>
 
+  <button class="other-orders-btn" id="other-orders-btn" onclick="toggleOtherOrders()">Items don't match? View customer's other orders</button>
+
+  <div class="other-orders-panel" id="other-orders-panel">
+    <div class="other-orders-loading" id="other-orders-loading">Loading other orders...</div>
+    <div id="other-orders-list"></div>
+  </div>
+
   <button class="confirm-btn" id="confirm-btn" onclick="confirmReceipt()" style="margin-top:8px">
     Confirm receipt
   </button>
@@ -815,6 +883,7 @@ function goBack() {
   showScreen('scan');
   document.getElementById('scan-error').classList.remove('visible');
   document.getElementById('track-input').value = '';
+  otherOrdersLoaded = false;
 }
 window.goBack = goBack;
 
@@ -979,6 +1048,130 @@ function toggleRentalItem(el) {
   el.querySelector('.rental-checkbox').textContent = checked ? '' : '\u2713';
 }
 
+// ---- Other orders ----
+let otherOrdersLoaded = false;
+
+async function toggleOtherOrders() {
+  const panel = document.getElementById('other-orders-panel');
+  const isVisible = panel.classList.contains('visible');
+  if (isVisible) {
+    panel.classList.remove('visible');
+    return;
+  }
+  panel.classList.add('visible');
+  if (otherOrdersLoaded) return;
+
+  const email = currentReturn.rm.customer_email;
+  if (!email) {
+    document.getElementById('other-orders-loading').textContent = 'No email found for this customer.';
+    return;
+  }
+
+  try {
+    const { data: orders } = await erpDb
+      .from('shopify_orders')
+      .select('id, order_number, tags, raw')
+      .eq('customer_email', email)
+      .gt('id', 1000000)
+      .order('id', { ascending: false });
+
+    const filtered = (orders || []).filter(o => {
+      const tags = o.tags || '';
+      return !tags.includes('Recurring order');
+    });
+
+    document.getElementById('other-orders-loading').style.display = 'none';
+    const list = document.getElementById('other-orders-list');
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="other-orders-loading">No other orders found.</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(o => {
+      let itemsText = '';
+      try {
+        const raw = typeof o.raw === 'string' ? JSON.parse(o.raw) : o.raw;
+        if (raw && raw.line_items) {
+          itemsText = raw.line_items.map(i => i.title || i.name).filter(Boolean).join(', ');
+        }
+      } catch(e) {}
+      return `<div class="other-order-row" onclick="selectOtherOrder('${o.id}', '${o.order_number}')">
+        <div>
+          <div class="other-order-name">${o.order_number}</div>
+          ${itemsText ? '<div class="other-order-items">' + itemsText + '</div>' : ''}
+        </div>
+        <div class="other-order-select">Select &rsaquo;</div>
+      </div>`;
+    }).join('');
+
+    otherOrdersLoaded = true;
+  } catch(e) {
+    console.error(e);
+    document.getElementById('other-orders-loading').textContent = 'Failed to load other orders.';
+  }
+}
+window.toggleOtherOrders = toggleOtherOrders;
+
+async function selectOtherOrder(shopifyId, orderNumber) {
+  // Update currentReturn with the selected order
+  const { data: order } = await erpDb
+    .from('shopify_orders')
+    .select('id, order_number, customer_email, tags, raw')
+    .eq('id', parseInt(shopifyId))
+    .maybeSingle();
+
+  if (!order) return;
+
+  currentReturn.shopifyOrder = order;
+  currentReturn.matchConfidence = 'manual';
+
+  // Update header
+  document.getElementById('confirm-order').textContent = orderNumber;
+
+  // Update items from Supercycle for new order
+  document.getElementById('rental-checklist').innerHTML = '<div class="other-orders-loading">Loading items...</div>';
+  document.getElementById('other-orders-panel').classList.remove('visible');
+  document.getElementById('other-orders-btn').textContent = 'Order changed to ' + orderNumber + ' — Items don't match?';
+
+  showLoading('Loading items from Supercycle...');
+  try {
+    const scData = await supercycle('getRentals', { shopifyOrderId: parseInt(shopifyId), orderName: orderNumber });
+    currentReturn.rentals = scData.data || [];
+  } catch(e) {
+    currentReturn.rentals = [];
+  }
+  hideLoading();
+
+  // Rebuild checklist
+  const checklist = document.getElementById('rental-checklist');
+  checklist.innerHTML = '';
+  if (currentReturn.rentals.length === 0) {
+    checklist.innerHTML = '<div class="no-rentals">No active rentals found in Supercycle for this order.</div>';
+  } else {
+    currentReturn.rentals.forEach(rental => {
+      const alreadyReceived = rental.receivalStatus === 'complete';
+      const title = (rental.item && rental.item.productTitle) || rental.shopifyOrderName || 'Item';
+      const variant = (rental.item && rental.item.variantTitle) ? rental.item.variantTitle : '';
+      const methodType = rental.methodType || '';
+      const div = document.createElement('div');
+      div.className = 'rental-item' + (alreadyReceived ? ' already-received' : '');
+      div.dataset.rentalId = rental.id;
+      div.dataset.returnOrderId = rental.returnOrderId || '';
+      div.dataset.checked = 'false';
+      div.innerHTML = `<div class="rental-checkbox">${alreadyReceived ? '\u2713' : ''}</div>
+        <div class="rental-item-info">
+          <div class="rental-item-title">${title}</div>
+          ${variant ? '<div class="rental-item-sub">' + variant + '</div>' : ''}
+        </div>
+        <div class="rental-item-badge">${alreadyReceived ? 'Received' : methodType}</div>`;
+      if (!alreadyReceived) div.addEventListener('click', () => toggleRentalItem(div));
+      checklist.appendChild(div);
+    });
+  }
+}
+window.selectOtherOrder = selectOtherOrder;
+
 // ---- Confirm receipt ----
 async function confirmReceipt() {
   if (!currentReturn || !currentStaff) return;
@@ -1053,6 +1246,7 @@ window.confirmReceipt = confirmReceipt;
 
 function scanAnother() {
   currentReturn = null;
+  otherOrdersLoaded = false;
   trackInput.value = '';
   showScreen('scan');
 }
