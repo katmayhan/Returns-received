@@ -1088,7 +1088,8 @@ async function toggleOtherOrders() {
       return;
     }
 
-    list.innerHTML = filtered.map(o => {
+    list.innerHTML = '';
+    filtered.forEach(o => {
       let itemsText = '';
       try {
         const raw = typeof o.raw === 'string' ? JSON.parse(o.raw) : o.raw;
@@ -1096,14 +1097,14 @@ async function toggleOtherOrders() {
           itemsText = raw.line_items.map(i => i.title || i.name).filter(Boolean).join(', ');
         }
       } catch(e) {}
-      return `<div class="other-order-row" onclick="selectOtherOrder('${o.id}', '${o.order_number}')">
-        <div>
-          <div class="other-order-name">${o.order_number}</div>
-          ${itemsText ? '<div class="other-order-items">' + itemsText + '</div>' : ''}
-        </div>
-        <div class="other-order-select">Select &rsaquo;</div>
-      </div>`;
-    }).join('');
+      const row = document.createElement('div');
+      row.className = 'other-order-row';
+      row.innerHTML = '<div><div class="other-order-name">' + o.order_number + '</div>' +
+        (itemsText ? '<div class="other-order-items">' + itemsText + '</div>' : '') +
+        '</div><div class="other-order-select">Select &#x203A;</div>';
+      row.addEventListener('click', () => selectOtherOrder(o.id, o.order_number));
+      list.appendChild(row);
+    });
 
     otherOrdersLoaded = true;
   } catch(e) {
