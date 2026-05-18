@@ -19,16 +19,45 @@ exports.handler = async (event) => {
 
     if (action === 'getRentals') {
       // GET /rentals?shopifyOrderId=X
+      if (payload.shopifyOrderId) {
+      url = `${BASE_URL}/rentals?shopifyOrderId=${payload.shopifyOrderId}&excludeCancelled=true`;
+    } else {
       url = `${BASE_URL}/rentals?search=${encodeURIComponent(payload.orderName)}&excludeCancelled=true`;
+    }
       method = 'GET';
 
     } else if (action === 'createReturn') {
-      // POST /return_orders — one rental at a time
-      url = `${BASE_URL}/return_orders`;
-      method = 'POST';
-      body = JSON.stringify({
-        data: [{ rentalId: payload.rentalId, status: 'received' }]
+      // POST /return_orders then immediately PUT to mark as received
+      const createRes = await fetch(`${BASE_URL}/return_orders`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SUPERCYCLE_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: [{ rentalId: payload.rentalId, status: 'awaiting' }]
+        })
       });
+      const createData = await createRes.json();
+      const returnOrder = createData.returnOrders && createData.returnOrders[0];
+      if (!returnOrder) {
+        return { statusCode: 422, headers, body: JSON.stringify({ error: 'Failed to create return', detail: createData }) };
+      }
+      // Now mark as received — update both the order status and each return line
+      const returnLineIds = returnOrder.returnLines ? returnOrder.returnLines.map(l => l.id) : [];
+      const updateRes = await fetch(`${BASE_URL}/return_orders/${returnOrder.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${SUPERCYCLE_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'received',
+          returnLines: returnLineIds.map(id => ({ id, status: 'received' }))
+        })
+      });
+      const updateData = await updateRes.json();
+      return { statusCode: updateRes.status, headers, body: JSON.stringify(updateData) };
 
     } else if (action === 'updateReturn') {
       // PUT /return_orders/{id} — mark as received

@@ -750,8 +750,11 @@
 
 const SUPABASE_URL = 'https://rousljiuoswvbszgfmys.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdXNsaml1b3N3dmJzemdmbXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTkwMDYsImV4cCI6MjA5MTEzNTAwNn0.pIz0ESqkXP6wqjI4H0sOOR-5diZTSQzSh9bksRLzaI0';
+const ERP_URL = 'https://zatjokylncxbeppwzqxu.supabase.co';
+const ERP_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphdGpva3lsbmN4YmVwcHd6cXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NDYxNDksImV4cCI6MjA5MTMyMjE0OX0.eAC8RFMNnL4R5ziIp_wARoUROLu937yUjOed4HbF4Mw';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const erpDb = createClient(ERP_URL, ERP_ANON_KEY);
 
 let currentStaff = null;
 let currentReturn = null; // { rm, shopifyOrder, matchConfidence, rentals }
@@ -865,35 +868,38 @@ async function lookupTracking() {
       return;
     }
 
-    // Step 2: shopify_orders by email
-    const { data: byEmail } = await db
+    // Step 2: shopify_orders from baboodle-erp by email
+    const { data: byEmail } = await erpDb
       .from('shopify_orders')
-      .select('id, order_name, email, full_name, postcode, line_items')
-      .eq('email', rm.customer_email);
+      .select('id, order_number, customer_email, fulfillment_status')
+      .eq('customer_email', rm.customer_email);
 
     let shopifyOrder = null;
     let matchConfidence = 'none';
     const normRm = normaliseOrder(rm.order_number);
 
     if (byEmail && byEmail.length > 0) {
-      const fullMatch = byEmail.find(r => normaliseOrder(r.order_name) === normRm);
+      const fullMatch = byEmail.find(r => normaliseOrder(r.order_number) === normRm);
       shopifyOrder = fullMatch || byEmail[0];
       matchConfidence = fullMatch ? 'full' : 'partial';
     } else {
-      const { data: allOrders } = await db.from('shopify_orders').select('id, order_name, email, full_name, postcode, line_items');
-      if (allOrders) {
-        const orderMatch = allOrders.find(r => normaliseOrder(r.order_name) === normRm);
-        if (orderMatch) { shopifyOrder = orderMatch; matchConfidence = 'partial'; }
-      }
+      // Try order number only
+      const { data: byOrder } = await erpDb
+        .from('shopify_orders')
+        .select('id, order_number, customer_email, fulfillment_status')
+        .eq('order_number', rm.order_number)
+        .maybeSingle();
+      if (byOrder) { shopifyOrder = byOrder; matchConfidence = 'partial'; }
     }
 
     // Step 3: Supercycle rentals for this order
     showLoading('Loading items from Supercycle...');
     let rentals = [];
-    const orderNameForLookup = (shopifyOrder && shopifyOrder.order_name) || rm.order_number;
-    if (orderNameForLookup) {
+    const shopifyNumericId = shopifyOrder && shopifyOrder.id;
+    const orderNameForLookup = rm.order_number;
+    if (shopifyNumericId || orderNameForLookup) {
       try {
-        const scData = await supercycle('getRentals', { orderName: orderNameForLookup });
+        const scData = await supercycle('getRentals', { shopifyOrderId: shopifyNumericId, orderName: orderNameForLookup });
         rentals = scData.data || [];
       } catch(e) {
         console.warn('Supercycle lookup failed:', e);
