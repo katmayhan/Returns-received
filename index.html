@@ -720,10 +720,9 @@
     <p>Enter your name to get started</p>
   </div>
   <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px;">
-    <input id="staff-name-input" type="text" placeholder="Your name" autocomplete="off"
-      style="width:100%;border:2px solid var(--border);border-radius:var(--radius-sm);padding:16px;font-family:'DM Sans',sans-serif;font-size:16px;outline:none;transition:border-color 0.15s;"
-      onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
-    <button class="scan-btn" onclick="confirmStaffName()" style="margin:0">Start</button>
+    <input id="staff-name-input" type="text" placeholder="Your name" autocomplete="off" autocorrect="off"
+      style="width:100%;border:2px solid #e5e7eb;border-radius:8px;padding:16px;font-size:16px;outline:none;font-family:DM Sans,sans-serif;">
+    <button onclick="confirmStaffName()" style="width:100%;background:#dc2626;color:white;border:none;border-radius:8px;padding:18px;font-size:17px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif;">Start</button>
   </div>
 </div>
 
