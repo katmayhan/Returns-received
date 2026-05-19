@@ -723,7 +723,7 @@
     <button class="staff-btn" onclick="selectStaff('Connor')">Connor</button>
     <button class="staff-btn" onclick="selectStaff('Ennis')">Ennis</button>
     <button class="staff-btn" onclick="selectStaff('Clive')">Clive</button>
-    <button class="staff-btn" onclick="selectStaff('Dan')" style="grid-column:1/-1">Dan</button>
+    <button class="staff-btn" onclick="selectStaff('Dan')">Dan</button>
   </div>
 </div>
 
@@ -880,6 +880,7 @@ function showApp() {
   document.getElementById('staff-chip-btn').textContent = currentStaff;
   showScreen('scan');
   loadRecent();
+  setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
 }
 window.__bblShowApp = function(name) {
   currentStaff = name;
