@@ -1,90 +1,91 @@
 const SUPERCYCLE_API_KEY = '9cxAk2V1hmaPBmKCGq59XCUfUxv1XW';
 const BASE_URL = 'https://app.supercycle.com/api/v1';
 
+const scFetch = (url, options = {}) => fetch(url, {
+  ...options,
+  headers: {
+    'Authorization': `Bearer ${SUPERCYCLE_API_KEY}`,
+    'Content-Type': 'application/json',
+    ...(options.headers || {})
+  }
+});
+
 exports.handler = async (event) => {
-  const headers = {
+  const cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json'
   };
 
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
-  }
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
   try {
     const { action, payload } = JSON.parse(event.body);
 
-    let url, method, body;
-
+    // ── Get rentals ──
     if (action === 'getRentals') {
-      // GET /rentals?shopifyOrderId=X
-      if (payload.shopifyOrderId) {
-      url = `${BASE_URL}/rentals?shopifyOrderId=${payload.shopifyOrderId}&excludeCancelled=true`;
-    } else {
-      url = `${BASE_URL}/rentals?search=${encodeURIComponent(payload.orderName)}&excludeCancelled=true`;
+      const url = payload.shopifyOrderId
+        ? `${BASE_URL}/rentals?shopifyOrderId=${payload.shopifyOrderId}&excludeCancelled=true`
+        : `${BASE_URL}/rentals?search=${encodeURIComponent(payload.orderName)}&excludeCancelled=true`;
+      const res = await scFetch(url);
+      const data = await res.json();
+      return { statusCode: res.status, headers: cors, body: JSON.stringify(data) };
     }
-      method = 'GET';
 
-    } else if (action === 'createReturn') {
-      // POST /return_orders then immediately PUT to mark as received
-      const createRes = await fetch(`${BASE_URL}/return_orders`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${SUPERCYCLE_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          data: [{ rentalId: payload.rentalId, status: 'awaiting' }]
-        })
-      });
-      const createData = await createRes.json();
-      const returnOrder = createData.returnOrders && createData.returnOrders[0];
-      if (!returnOrder) {
-        return { statusCode: 422, headers, body: JSON.stringify({ error: 'Failed to create return', detail: createData }) };
+    // ── Create or update return, then mark lines as received ──
+    if (action === 'createReturn') {
+      const { rentalId } = payload;
+
+      // First check if a return order already exists for this rental
+      const rentalRes = await scFetch(`${BASE_URL}/rentals/${rentalId}`);
+      const rentalData = await rentalRes.json();
+      console.log('rental:', JSON.stringify(rentalData));
+
+      let returnOrderId = rentalData.returnOrderId || null;
+      let returnLines = [];
+
+      if (returnOrderId) {
+        // Return order already exists — fetch its lines
+        const roRes = await scFetch(`${BASE_URL}/return_orders/${returnOrderId}`);
+        const roData = await roRes.json();
+        console.log('existing return order:', JSON.stringify(roData));
+        returnLines = roData.returnLines || [];
+      } else {
+        // Create a new return order
+        const createRes = await scFetch(`${BASE_URL}/return_orders`, {
+          method: 'POST',
+          body: JSON.stringify({ data: [{ rentalId }] })
+        });
+        const createData = await createRes.json();
+        console.log('created return order:', JSON.stringify(createData));
+        const returnOrder = createData.returnOrders && createData.returnOrders[0];
+        if (!returnOrder) {
+          return { statusCode: 422, headers: cors, body: JSON.stringify({ error: 'Failed to create return', detail: createData }) };
+        }
+        returnOrderId = returnOrder.id;
+        returnLines = returnOrder.returnLines || [];
       }
-      // Now mark as received — update both the order status and each return line
-      const returnLineIds = returnOrder.returnLines ? returnOrder.returnLines.map(l => l.id) : [];
-      const updateRes = await fetch(`${BASE_URL}/return_orders/${returnOrder.id}`, {
+
+      if (returnLines.length === 0) {
+        return { statusCode: 422, headers: cors, body: JSON.stringify({ error: 'No return lines found', returnOrderId }) };
+      }
+
+      // Mark all return lines as received
+      const updateRes = await scFetch(`${BASE_URL}/return_orders/${returnOrderId}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${SUPERCYCLE_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify({
-          status: 'received',
-          returnLines: returnLineIds.map(id => ({ id, status: 'received' }))
+          returnLines: returnLines.map(l => ({ id: l.id, status: 'received' }))
         })
       });
       const updateData = await updateRes.json();
-      return { statusCode: updateRes.status, headers, body: JSON.stringify(updateData) };
-
-    } else if (action === 'updateReturn') {
-      // PUT /return_orders/{id} — mark as received
-      url = `${BASE_URL}/return_orders/${payload.returnOrderId}`;
-      method = 'PUT';
-      body = JSON.stringify({
-        status: 'received',
-        returnLines: payload.returnLineIds.map(id => ({ id, status: 'received' }))
-      });
-
-    } else {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Unknown action' }) };
+      console.log('update result:', JSON.stringify(updateData));
+      return { statusCode: updateRes.status, headers: cors, body: JSON.stringify(updateData) };
     }
 
-    const response = await fetch(url, {
-      method,
-      headers: {
-        'Authorization': `Bearer ${SUPERCYCLE_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      ...(body ? { body } : {})
-    });
-
-    const data = await response.json();
-    return { statusCode: response.status, headers, body: JSON.stringify(data) };
+    return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Unknown action' }) };
 
   } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    console.error('Error:', err);
+    return { statusCode: 500, headers: cors, body: JSON.stringify({ error: err.message }) };
   }
 };

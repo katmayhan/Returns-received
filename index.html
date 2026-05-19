@@ -735,9 +735,10 @@
       <p>Scan or enter the Royal Mail tracking number</p>
     </div>
     <div class="scan-card-body">
-      <!-- Hidden input captures scanner without opening keyboard -->
-      <input id="track-input" type="text" autocomplete="off" autocorrect="off" spellcheck="false"
-        style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;">
+      <!-- Scanner input: inputmode=none prevents soft keyboard on Android -->
+      <input id="track-input" type="text" inputmode="none" autocomplete="off" autocorrect="off" spellcheck="false"
+        class="track-input" placeholder="Waiting for scan..." readonly
+        style="text-align:center;font-size:14px;color:var(--text-3);cursor:default;">
 
       <div class="scanner-target" id="scanner-target-el">
         <svg width="36" height="36" fill="none" stroke="#dc2626" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 5h2M7 5h1M3 5v2M21 5h-2M17 5h-1M21 5v2M3 19h2M7 19h1M3 19v-2M21 19h-2M17 19h-1M21 19v-2"/><line x1="4" y1="12" x2="20" y2="12" stroke="#dc2626" stroke-width="2"/></svg>
@@ -900,6 +901,9 @@ document.getElementById('staff-chip-btn').addEventListener('click', () => {
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'scan') {
+    setTimeout(focusScannerInput, 100);
+  }
 }
 
 function goBack() {
@@ -912,36 +916,57 @@ function goBack() {
 window.goBack = goBack;
 
 // ---- Scanner input ----
-const trackInput = document.getElementById('track-input'); // hidden, captures scanner
-const manualInput = document.getElementById('manual-input'); // visible, for manual entry
+const trackInput = document.getElementById('track-input');
+const manualInput = document.getElementById('manual-input');
 
-// Tap scanner target to focus hidden input (ready for scanner without keyboard)
-document.getElementById('scanner-target-el').addEventListener('click', () => {
+// Auto-focus scanner input on scan screen — inputmode=none prevents keyboard
+function focusScannerInput() {
+  trackInput.removeAttribute('readonly');
   trackInput.focus({ preventScroll: true });
-  document.getElementById('scanner-target-el').classList.add('focused');
-});
+  trackInput.setAttribute('readonly', true);
+}
 
-// Scanner fires into hidden input via debounce
+// Tap scanner target or the input itself to re-focus
+document.getElementById('scanner-target-el').addEventListener('click', focusScannerInput);
+trackInput.addEventListener('click', focusScannerInput);
+
+// Scanner input handler
 let scanDebounce = null;
 trackInput.addEventListener('input', () => {
   clearTimeout(scanDebounce);
-  scanDebounce = setTimeout(() => {
-    const val = trackInput.value.trim();
-    if (val.length >= 8) {
+  const val = trackInput.value.trim();
+  if (val.length >= 8) {
+    scanDebounce = setTimeout(() => {
       lookupTracking(val);
       trackInput.value = '';
-    }
-  }, 300);
+      trackInput.placeholder = 'Waiting for scan...';
+      trackInput.style.color = 'var(--text-3)';
+      focusScannerInput();
+    }, 300);
+  }
 });
+
 trackInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     clearTimeout(scanDebounce);
     const val = trackInput.value.trim();
-    if (val.length >= 2) { lookupTracking(val); trackInput.value = ''; }
+    if (val.length >= 2) {
+      lookupTracking(val);
+      trackInput.value = '';
+      focusScannerInput();
+    }
   }
 });
 
-// Manual input - Enter key or Go button
+// Show scanned value in the input while scanning
+trackInput.addEventListener('input', () => {
+  if (trackInput.value) {
+    trackInput.style.color = 'var(--text)';
+    trackInput.placeholder = '';
+  }
+}, { capture: true });
+
+// Manual input
 manualInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') lookupManual();
 });
@@ -1245,16 +1270,8 @@ async function confirmReceipt() {
     const rentalId = parseInt(item.dataset.rentalId);
     const existingReturnOrderId = item.dataset.returnOrderId ? parseInt(item.dataset.returnOrderId) : null;
     try {
-      if (existingReturnOrderId) {
-        // Update existing return order to received
-        await supercycle('updateReturn', {
-          returnOrderId: existingReturnOrderId,
-          returnLineIds: []
-        });
-      } else {
-        // Create new return order marked as received
-        await supercycle('createReturn', { rentalId });
-      }
+      // Always use createReturn — the function handles existing returns too
+      await supercycle('createReturn', { rentalId });
     } catch(e) {
       console.error('Supercycle error for rental', rentalId, e);
       errors.push(rentalId);
