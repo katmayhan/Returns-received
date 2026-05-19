@@ -737,7 +737,7 @@
     <div class="scan-card-body">
       <!-- Scanner input: inputmode=none prevents soft keyboard on Android -->
       <input id="track-input" type="text" inputmode="none" autocomplete="off" autocorrect="off" spellcheck="false"
-        class="track-input" placeholder="Waiting for scan..." readonly
+        class="track-input" placeholder="Waiting for scan..."
         style="text-align:center;font-size:14px;color:var(--text-3);cursor:default;">
 
       <div class="scanner-target" id="scanner-target-el">
@@ -921,9 +921,7 @@ const manualInput = document.getElementById('manual-input');
 
 // Auto-focus scanner input on scan screen — inputmode=none prevents keyboard
 function focusScannerInput() {
-  trackInput.removeAttribute('readonly');
   trackInput.focus({ preventScroll: true });
-  trackInput.setAttribute('readonly', true);
 }
 
 // Tap scanner target or the input itself to re-focus
