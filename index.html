@@ -546,6 +546,105 @@
     100% { top: 10%; opacity: 1; }
   }
 
+  /* -- Issue logging -- */
+  .issue-toggle-btn {
+    width: 100%;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    margin-top: 4px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .issue-toggle-btn:active { background: var(--bg); }
+  .issue-panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .issue-panel.hidden { display: none; }
+  .issue-panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .issue-select {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+  }
+  .issue-select:focus { border-color: var(--red); }
+  .issue-textarea {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    resize: none;
+    min-height: 80px;
+  }
+  .issue-textarea:focus { border-color: var(--red); }
+  .issue-photo-btn {
+    width: 100%;
+    background: var(--bg);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .issue-photo-btn.has-photo {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-light);
+  }
+  .issue-photo-preview {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    max-height: 200px;
+    object-fit: cover;
+    display: none;
+  }
+  .issue-photo-preview.visible { display: block; }
+
   /* -- Other orders panel -- */
   .other-orders-btn {
     width: 100%;
@@ -800,6 +899,31 @@
     <div id="other-orders-list"></div>
   </div>
 
+  <!-- Issue logging -->
+  <button class="issue-toggle-btn" id="issue-toggle-btn" onclick="toggleIssuePanel()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Log an issue with this return
+  </button>
+
+  <div class="issue-panel hidden" id="issue-panel">
+    <div class="issue-panel-title">Issue details</div>
+    <select class="issue-select" id="issue-type">
+      <option value="">Select issue type...</option>
+      <option value="incomplete_return">Incomplete return — items missing</option>
+      <option value="damaged">Damaged item</option>
+      <option value="missing_part">Missing part</option>
+      <option value="wrong_item">Wrong item returned</option>
+      <option value="other">Other</option>
+    </select>
+    <textarea class="issue-textarea" id="issue-notes" placeholder="Describe the issue..."></textarea>
+    <input type="file" id="issue-photo-input" accept="image/*" capture="environment" style="display:none;">
+    <button class="issue-photo-btn" id="issue-photo-btn" onclick="document.getElementById('issue-photo-input').click()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      Add photo (optional)
+    </button>
+    <img class="issue-photo-preview" id="issue-photo-preview" alt="Issue photo">
+  </div>
+
   <button class="confirm-btn" id="confirm-btn" onclick="confirmReceipt()" style="margin-top:8px">
     Confirm receipt
   </button>
@@ -912,6 +1036,7 @@ function goBack() {
   document.getElementById('track-input').value = '';
   document.getElementById('manual-input').value = '';
   otherOrdersLoaded = false;
+  resetIssuePanel();
 }
 window.goBack = goBack;
 
@@ -1244,6 +1369,83 @@ async function selectOtherOrder(shopifyId, orderNumber) {
 }
 window.selectOtherOrder = selectOtherOrder;
 
+// ---- Issue logging ----
+let issuePhotoFile = null;
+
+function toggleIssuePanel() {
+  const panel = document.getElementById('issue-panel');
+  const btn = document.getElementById('issue-toggle-btn');
+  const isHidden = panel.classList.contains('hidden');
+  panel.classList.toggle('hidden', !isHidden);
+  btn.style.color = isHidden ? 'var(--red)' : 'var(--text-2)';
+  btn.style.borderColor = isHidden ? 'var(--red)' : 'var(--border)';
+}
+window.toggleIssuePanel = toggleIssuePanel;
+
+document.getElementById('issue-photo-input').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  issuePhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const preview = document.getElementById('issue-photo-preview');
+    preview.src = e.target.result;
+    preview.classList.add('visible');
+    const btn = document.getElementById('issue-photo-btn');
+    btn.classList.add('has-photo');
+    btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Photo added — tap to replace';
+  };
+  reader.readAsDataURL(file);
+});
+
+async function uploadIssuePhoto(file) {
+  const ext = file.name.split('.').pop() || 'jpg';
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { data, error } = await db.storage.from('issue-photos').upload(filename, file, {
+    contentType: file.type,
+    upsert: false
+  });
+  if (error) throw error;
+  const { data: urlData } = db.storage.from('issue-photos').getPublicUrl(filename);
+  return urlData.publicUrl;
+}
+
+async function logIssue(rm, shopifyOrder) {
+  const issueType = document.getElementById('issue-type').value;
+  const notes = document.getElementById('issue-notes').value.trim();
+  if (!issueType) return; // no issue type selected, skip
+
+  let photoUrl = null;
+  if (issuePhotoFile) {
+    try { photoUrl = await uploadIssuePhoto(issuePhotoFile); } catch(e) { console.warn('Photo upload failed:', e); }
+  }
+
+  await db.from('issues').insert({
+    logged_at_stage: 'return',
+    issue_type: issueType,
+    notes: notes || null,
+    photo_url: photoUrl,
+    tracking_number: rm.tracking_number,
+    order_number: rm.order_number,
+    customer_name: rm.customer_name,
+    customer_email: rm.customer_email,
+    logged_by: currentStaff
+  });
+}
+
+function resetIssuePanel() {
+  issuePhotoFile = null;
+  document.getElementById('issue-type').value = '';
+  document.getElementById('issue-notes').value = '';
+  document.getElementById('issue-photo-preview').src = '';
+  document.getElementById('issue-photo-preview').classList.remove('visible');
+  document.getElementById('issue-photo-btn').classList.remove('has-photo');
+  document.getElementById('issue-photo-btn').innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Add photo (optional)';
+  document.getElementById('issue-panel').classList.add('hidden');
+  document.getElementById('issue-toggle-btn').style.color = 'var(--text-2)';
+  document.getElementById('issue-toggle-btn').style.borderColor = 'var(--border)';
+}
+
 // ---- Confirm receipt ----
 async function confirmReceipt() {
   if (!currentReturn || !currentStaff) return;
@@ -1287,6 +1489,13 @@ async function confirmReceipt() {
     console.error('Supabase write error', e);
   }
 
+  // Log issue if one was entered
+  const issueType = document.getElementById('issue-type').value;
+  if (issueType) {
+    try { await logIssue(currentReturn.rm, currentReturn.shopifyOrder); }
+    catch(e) { console.warn('Issue log failed:', e); }
+  }
+
   const rm = currentReturn.rm;
   const order = currentReturn.shopifyOrder;
   const timeStr = new Date(now).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -1313,6 +1522,7 @@ function scanAnother() {
   otherOrdersLoaded = false;
   trackInput.value = '';
   document.getElementById('manual-input').value = '';
+  resetIssuePanel();
   showScreen('scan');
 }
 window.scanAnother = scanAnother;
