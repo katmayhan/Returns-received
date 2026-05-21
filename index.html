@@ -1008,6 +1008,12 @@
     <div id="manual-check-added" style="display:none;margin-top:8px;color:#16a34a;font-weight:600;">Added to Manual Checks</div>
   </div>
 
+  <div id="partial-banner" style="display:none;margin-bottom:16px;background:#eff6ff;border:2px solid #3b82f6;border-radius:8px;padding:14px;font-size:13px;color:#1e40af;">
+    <div style="font-weight:700;margin-bottom:4px;">Partial return already logged for this order</div>
+    <div id="partial-banner-note" style="font-style:italic;"></div>
+    <div style="margin-top:6px;font-size:12px;color:#3b82f6;">Confirm full receipt below to stop billing.</div>
+  </div>
+
   <div class="section-label" style="margin-top:8px">Items on this order</div>
   <div class="checklist-intro">Tick each item you are physically receiving in this box</div>
   <div id="rental-checklist"></div>
@@ -1052,6 +1058,15 @@
   <button class="confirm-btn" id="confirm-btn" onclick="confirmReceipt()" style="margin-top:8px">
     Confirm receipt
   </button>
+
+  <button class="other-orders-btn" id="partial-btn" onclick="togglePartialPanel()" style="margin-top:6px;border-color:#3b82f6;color:#1e40af;">
+    Mark as partially received
+  </button>
+  <div id="partial-panel" style="display:none;background:#eff6ff;border:1px solid #3b82f6;border-radius:8px;padding:14px;margin-top:8px;">
+    <div style="font-size:13px;font-weight:600;color:#1e40af;margin-bottom:8px;">Which part was received?</div>
+    <textarea id="partial-notes" style="width:100%;border:1px solid #93c5fd;border-radius:6px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;min-height:70px;color:var(--text);background:var(--surface);" placeholder="e.g. Main frame received, extension set still to come"></textarea>
+    <button class="scan-btn" onclick="confirmPartial()" style="margin-top:10px;background:#3b82f6;">Save partial receipt</button>
+  </div>
   <div class="error-banner" id="confirm-error">Failed to log receipt. Please try again.</div>
 </div>
 
@@ -1258,6 +1273,19 @@ async function lookupTracking(raw) {
       return;
     }
 
+    // Check for existing partial receipt on same order number
+    let existingPartial = null;
+    if (rm.order_number) {
+      const { data: partialData } = await db
+        .from('royal_mail')
+        .select('tracking_number, notes, received_at, received_by')
+        .eq('order_number', rm.order_number)
+        .eq('receipt_status', 'partial')
+        .neq('tracking_number', raw)
+        .maybeSingle();
+      existingPartial = partialData || null;
+    }
+
     // Steps 2 & 3 in parallel: shopify lookup + order-number-based Supercycle lookup
     showLoading('Loading order details...');
     const normRm = normaliseOrder(rm.order_number);
@@ -1299,7 +1327,7 @@ async function lookupTracking(raw) {
       } catch(e) {}
     }
 
-    currentReturn = { rm, shopifyOrder, matchConfidence, rentals };
+    currentReturn = { rm, shopifyOrder, matchConfidence, rentals, existingPartial };
     hideLoading();
     showConfirm(currentReturn);
 
@@ -1320,6 +1348,22 @@ function showConfirm({ rm, shopifyOrder, matchConfidence, rentals }) {
   document.getElementById('confirm-postcode').textContent = rm.customer_postcode || (shopifyOrder && shopifyOrder.postcode) || '--';
 
   document.getElementById('match-warning').style.display = matchConfidence === 'partial' ? 'block' : 'none';
+
+  // Show partial banner if another box was already received
+  const existingPartial = currentReturn.existingPartial;
+  const partialBanner = document.getElementById('partial-banner');
+  if (existingPartial) {
+    document.getElementById('partial-banner-note').textContent = existingPartial.notes || 'No note added';
+    partialBanner.style.display = 'block';
+  } else {
+    partialBanner.style.display = 'none';
+  }
+
+  // Reset partial panel
+  document.getElementById('partial-panel').style.display = 'none';
+  document.getElementById('partial-btn').textContent = 'Mark as partially received';
+  document.getElementById('partial-btn').style.borderColor = '#3b82f6';
+  document.getElementById('partial-btn').style.color = '#1e40af';
 
   // Check for replacement tag
   const tags = (shopifyOrder && shopifyOrder.tags) || '';
@@ -1576,6 +1620,47 @@ function resetIssuePanel() {
   document.getElementById('issue-toggle-btn').style.color = 'var(--text-2)';
   document.getElementById('issue-toggle-btn').style.borderColor = 'var(--border)';
 }
+
+// ---- Partial receipt ----
+function togglePartialPanel() {
+  const panel = document.getElementById('partial-panel');
+  const isHidden = panel.style.display === 'none';
+  panel.style.display = isHidden ? 'block' : 'none';
+}
+window.togglePartialPanel = togglePartialPanel;
+
+async function confirmPartial() {
+  if (!currentReturn || !currentStaff) return;
+  const notes = document.getElementById('partial-notes').value.trim();
+  if (!notes) {
+    alert('Please add a note describing which part was received.');
+    return;
+  }
+
+  const btn = document.querySelector('#partial-panel .scan-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  const now = new Date().toISOString();
+  await db.from('royal_mail').update({
+    received_at: now,
+    received_by: currentStaff,
+    receipt_status: 'partial',
+    notes: notes,
+    status: 'partial'
+  }).eq('tracking_number', currentReturn.rm.tracking_number);
+
+  btn.disabled = false;
+  btn.textContent = 'Saved!';
+  setTimeout(() => {
+    document.getElementById('partial-panel').style.display = 'none';
+    document.getElementById('partial-btn').textContent = 'Partially received — logged';
+    document.getElementById('partial-btn').style.borderColor = 'var(--green)';
+    document.getElementById('partial-btn').style.color = 'var(--green)';
+    loadRecent();
+  }, 800);
+}
+window.confirmPartial = confirmPartial;
 
 // ---- Manual check flag ----
 async function addToManualChecks() {
