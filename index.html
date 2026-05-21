@@ -847,7 +847,7 @@
 <div class="screen" id="screen-scan">
 
   <!-- Tab nav -->
-  <div style="display:flex;border-bottom:2px solid var(--border);margin-bottom:16px;background:var(--surface);margin:-16px -16px 16px;padding:0 16px;">
+  <div style="display:flex;border-bottom:2px solid var(--border);margin:-16px -16px 16px;background:var(--surface);padding:0 16px;position:sticky;top:57px;z-index:50;">
     <button class="tab-btn active" id="tab-log" onclick="switchTab('log')">Log a return</button>
     <button class="tab-btn" id="tab-history" onclick="switchTab('history')">History</button>
     <button class="tab-btn" id="tab-manual" onclick="switchTab('manual')">Manual checks <span id="manual-count-badge" style="display:none;background:var(--red);color:white;border-radius:10px;padding:1px 6px;font-size:11px;margin-left:4px"></span></button>
@@ -855,32 +855,24 @@
 
   <!-- LOG TAB -->
   <div id="tab-content-log">
-  <div class="scan-card">
-    <div class="scan-card-header">
-      <h2>Log a return</h2>
-      <p>Scan or enter the Royal Mail tracking number</p>
-    </div>
-    <div class="scan-card-body">
       <!-- Scanner input: inputmode=none prevents soft keyboard on Android -->
       <input id="track-input" type="text" inputmode="none" autocomplete="off" autocorrect="off" spellcheck="false"
         class="track-input" placeholder="Waiting for scan..."
-        style="text-align:center;font-size:14px;color:var(--text-3);cursor:default;">
+        style="text-align:center;font-size:14px;color:var(--text-3);cursor:default;margin-bottom:10px;">
 
-      <div class="scanner-target" id="scanner-target-el">
+      <div class="scanner-target" id="scanner-target-el" style="margin-bottom:10px;">
         <svg width="36" height="36" fill="none" stroke="#dc2626" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 5h2M7 5h1M3 5v2M21 5h-2M17 5h-1M21 5v2M3 19h2M7 19h1M3 19v-2M21 19h-2M17 19h-1M21 19v-2"/><line x1="4" y1="12" x2="20" y2="12" stroke="#dc2626" stroke-width="2"/></svg>
         <div class="scanner-label">Ready to scan</div>
         <div class="scanner-sub">Point scanner at the Royal Mail barcode and pull trigger</div>
       </div>
 
-      <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
         <input id="manual-input" type="text" placeholder="Type tracking number manually"
           autocomplete="off" autocorrect="off" spellcheck="false"
           class="track-input" style="flex:1;margin:0;">
         <button class="scan-btn" onclick="lookupManual()" style="width:auto;padding:14px 16px;margin:0;flex-shrink:0;">Go</button>
       </div>
       <div class="error-banner" id="scan-error">Unable to match this tracking number. Please check and try again.</div>
-    </div>
-  </div>
 
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
     <div class="section-label" style="margin:0">Received today</div>
@@ -1080,7 +1072,6 @@ function showApp() {
   document.getElementById('staff-chip-btn').textContent = currentStaff;
   showScreen('scan');
   loadRecent();
-  setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
 }
 window.__bblShowApp = function(name) {
   currentStaff = name;
