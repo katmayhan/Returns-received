@@ -894,8 +894,63 @@
       <input id="hist-search" type="text" placeholder="Search order, customer, email, tracking..." autocomplete="off"
         style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;outline:none;background:var(--surface);color:var(--text);"
         oninput="loadHistory()">
-      <input id="hist-date" type="date"
-        style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;outline:none;background:var(--surface);color:var(--text);">
+      <div style="display:flex;gap:8px;">
+        <select id="hist-day" style="flex:1;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 8px;font-size:14px;background:var(--surface);color:var(--text);outline:none;">
+          <option value="">Day</option>
+          <option value="01">1</option>
+<option value="02">2</option>
+<option value="03">3</option>
+<option value="04">4</option>
+<option value="05">5</option>
+<option value="06">6</option>
+<option value="07">7</option>
+<option value="08">8</option>
+<option value="09">9</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+        </select>
+        <select id="hist-month" style="flex:1.5;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 8px;font-size:14px;background:var(--surface);color:var(--text);outline:none;">
+          <option value="">Month</option>
+          <option value="01">Jan</option>
+<option value="02">Feb</option>
+<option value="03">Mar</option>
+<option value="04">Apr</option>
+<option value="05">May</option>
+<option value="06">Jun</option>
+<option value="07">Jul</option>
+<option value="08">Aug</option>
+<option value="09">Sep</option>
+<option value="10">Oct</option>
+<option value="11">Nov</option>
+<option value="12">Dec</option>
+        </select>
+        <select id="hist-year" style="flex:1.2;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 8px;font-size:14px;background:var(--surface);color:var(--text);outline:none;">
+          <option value="">Year</option>
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+        </select>
+      </div>
       <button class="scan-btn secondary" onclick="loadHistory()">Search</button>
     </div>
     <div id="history-list"><div class="empty-state">Enter a search term or date above</div></div>
@@ -1799,13 +1854,17 @@ window.goBackFromReceipt = goBackFromReceipt;
 async function loadHistory() {
   const q = (document.getElementById('hist-search').value || '').trim().toLowerCase();
   const date = document.getElementById('hist-date').value;
-  if (!q && !date) { document.getElementById('history-list').innerHTML = '<div class="empty-state">Enter a search term or date above</div>'; return; }
+  const day = document.getElementById('hist-day') ? document.getElementById('hist-day').value : '';
+  const month = document.getElementById('hist-month') ? document.getElementById('hist-month').value : '';
+  const year = document.getElementById('hist-year') ? document.getElementById('hist-year').value : '';
+  const hasDate = day && month && year;
+  if (!q && !hasDate) { document.getElementById('history-list').innerHTML = '<div class="empty-state">Enter a search term or date above</div>'; return; }
 
   let query = db.from('royal_mail').select('tracking_number, order_number, customer_name, customer_email, received_at, received_by, notes, manual_check').not('received_at', 'is', null).order('received_at', { ascending: false }).limit(100);
 
-  if (date) {
-    const start = new Date(date); start.setHours(0,0,0,0);
-    const end = new Date(date); end.setHours(23,59,59,999);
+  if (day && month && year) {
+    const start = new Date(`${year}-${month}-${day}T00:00:00`);
+    const end = new Date(`${year}-${month}-${day}T23:59:59`);
     query = query.gte('received_at', start.toISOString()).lte('received_at', end.toISOString());
   }
 
