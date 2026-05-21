@@ -1750,6 +1750,13 @@ async function openReceiptDetail(trackingNumber) {
       This return is in Manual Checks — please verify the correct rental was marked as received.
     </div>` : ''}
 
+    ${!rm.received_at ? `
+    <button class="confirm-btn" onclick="markReceivedFromDetail('${rm.tracking_number}')" id="mark-received-detail-btn">
+      Mark as received
+    </button>
+    <div id="mark-received-done" style="display:none;text-align:center;font-size:14px;color:var(--green);font-weight:600;margin-bottom:12px;">Marked as received</div>
+    ` : ''}
+
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;">
       <div class="field-label" style="margin-bottom:8px">Notes</div>
       <textarea id="receipt-notes" style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;min-height:80px;color:var(--text);background:var(--surface);" placeholder="Add notes about this return...">${rm.notes || ''}</textarea>
@@ -1759,6 +1766,23 @@ async function openReceiptDetail(trackingNumber) {
   `;
 }
 window.openReceiptDetail = openReceiptDetail;
+
+async function markReceivedFromDetail(trackingNumber) {
+  if (!currentStaff) { alert('Please select your name first'); return; }
+  const btn = document.getElementById('mark-received-detail-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Marking...'; }
+  const now = new Date().toISOString();
+  await db.from('royal_mail').update({
+    received_at: now,
+    received_by: currentStaff,
+    status: 'received'
+  }).eq('tracking_number', trackingNumber);
+  if (btn) btn.style.display = 'none';
+  const done = document.getElementById('mark-received-done');
+  if (done) done.style.display = 'block';
+  loadRecent();
+}
+window.markReceivedFromDetail = markReceivedFromDetail;
 
 async function saveReceiptNotes(trackingNumber) {
   const notes = document.getElementById('receipt-notes').value.trim();
