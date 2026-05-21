@@ -645,6 +645,23 @@
   }
   .issue-photo-preview.visible { display: block; }
 
+  /* -- Tabs -- */
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 14px 16px 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
+  .tab-btn:active { opacity: 0.7; }
+
   /* -- Other orders panel -- */
   .other-orders-btn {
     width: 100%;
@@ -828,6 +845,16 @@
 
 <!-- SCREEN: Scan -->
 <div class="screen" id="screen-scan">
+
+  <!-- Tab nav -->
+  <div style="display:flex;border-bottom:2px solid var(--border);margin-bottom:16px;background:var(--surface);margin:-16px -16px 16px;padding:0 16px;">
+    <button class="tab-btn active" id="tab-log" onclick="switchTab('log')">Log a return</button>
+    <button class="tab-btn" id="tab-history" onclick="switchTab('history')">History</button>
+    <button class="tab-btn" id="tab-manual" onclick="switchTab('manual')">Manual checks <span id="manual-count-badge" style="display:none;background:var(--red);color:white;border-radius:10px;padding:1px 6px;font-size:11px;margin-left:4px"></span></button>
+  </div>
+
+  <!-- LOG TAB -->
+  <div id="tab-content-log">
   <div class="scan-card">
     <div class="scan-card-header">
       <h2>Log a return</h2>
@@ -855,10 +882,47 @@
     </div>
   </div>
 
-  <div class="section-label">Received today</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+    <div class="section-label" style="margin:0">Received today</div>
+    <input id="history-search-today" type="text" placeholder="Search..." autocomplete="off"
+      style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;font-size:13px;outline:none;width:160px;background:var(--surface);color:var(--text);"
+      oninput="filterToday()">
+  </div>
   <div id="recent-list">
     <div class="empty-state">No receipts logged today yet</div>
   </div>
+  </div> <!-- end tab-content-log -->
+
+  <!-- HISTORY TAB -->
+  <div id="tab-content-history" style="display:none">
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      <input id="hist-search" type="text" placeholder="Search order, customer, email, tracking..." autocomplete="off"
+        style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;outline:none;background:var(--surface);color:var(--text);"
+        oninput="loadHistory()">
+      <input id="hist-date" type="date"
+        style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;outline:none;background:var(--surface);color:var(--text);">
+      <button class="scan-btn secondary" onclick="loadHistory()">Search</button>
+    </div>
+    <div id="history-list"><div class="empty-state">Enter a search term or date above</div></div>
+  </div>
+
+  <!-- MANUAL CHECKS TAB -->
+  <div id="tab-content-manual" style="display:none">
+    <div style="background:var(--amber-light);border:1px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;margin-bottom:16px;">
+      These returns need manual verification before marking as received.
+    </div>
+    <div id="manual-list"><div class="empty-state">No items in manual checks</div></div>
+  </div>
+
+</div>
+
+<!-- SCREEN: Receipt detail -->
+<div class="screen" id="screen-receipt">
+  <button class="back-btn" onclick="goBackFromReceipt()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back
+  </button>
+  <div id="receipt-detail-content"></div>
 </div>
 
 <!-- SCREEN: Confirm -->
@@ -886,6 +950,12 @@
 
   <div id="match-warning" style="display:none;margin-bottom:16px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;">
     &#9888; Order number and email don't match. Please manually confirm in Supercycle before confirming receipt.
+  </div>
+
+  <div id="replacement-warning" style="display:none;margin-bottom:16px;background:#fef3c7;border:2px solid #f59e0b;border-radius:8px;padding:14px;font-size:13px;font-weight:600;color:#92400e;">
+    &#9888; Replacement return. Add to Manual Checks to make sure we are cancelling the correct rental.
+    <button onclick="addToManualChecks()" style="display:block;margin-top:10px;background:#f59e0b;color:white;border:none;border-radius:6px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;" id="manual-check-btn">Add to Manual Checks</button>
+    <div id="manual-check-added" style="display:none;margin-top:8px;color:#16a34a;font-weight:600;">Added to Manual Checks</div>
   </div>
 
   <div class="section-label" style="margin-top:8px">Items on this order</div>
@@ -1197,6 +1267,13 @@ function showConfirm({ rm, shopifyOrder, matchConfidence, rentals }) {
 
   document.getElementById('match-warning').style.display = matchConfidence === 'partial' ? 'block' : 'none';
 
+  // Check for replacement tag
+  const tags = (shopifyOrder && shopifyOrder.tags) || '';
+  const isReplacement = tags.toLowerCase().includes('replacement');
+  document.getElementById('replacement-warning').style.display = isReplacement ? 'block' : 'none';
+  document.getElementById('manual-check-btn').style.display = 'block';
+  document.getElementById('manual-check-added').style.display = 'none';
+
   // Build rental checklist
   const checklist = document.getElementById('rental-checklist');
   checklist.innerHTML = '';
@@ -1446,6 +1523,17 @@ function resetIssuePanel() {
   document.getElementById('issue-toggle-btn').style.borderColor = 'var(--border)';
 }
 
+// ---- Manual check flag ----
+async function addToManualChecks() {
+  if (!currentReturn) return;
+  await db.from('royal_mail')
+    .update({ manual_check: true })
+    .eq('tracking_number', currentReturn.rm.tracking_number);
+  document.getElementById('manual-check-btn').style.display = 'none';
+  document.getElementById('manual-check-added').style.display = 'block';
+}
+window.addToManualChecks = addToManualChecks;
+
 // ---- Confirm receipt ----
 async function confirmReceipt() {
   if (!currentReturn || !currentStaff) return;
@@ -1527,29 +1615,55 @@ function scanAnother() {
 }
 window.scanAnother = scanAnother;
 
+// ---- Tabs ----
+let currentTab = 'log';
+function switchTab(tab) {
+  currentTab = tab;
+  ['log','history','manual'].forEach(t => {
+    document.getElementById('tab-content-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'history') loadHistory();
+  if (tab === 'manual') loadManualChecks();
+}
+window.switchTab = switchTab;
+
 // ---- Recent receipts ----
+let allTodayReceipts = [];
+
 async function loadRecent() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const { data } = await db
     .from('royal_mail')
-    .select('tracking_number, order_number, customer_name, received_at, received_by')
+    .select('tracking_number, order_number, customer_name, received_at, received_by, notes, manual_check')
     .gte('received_at', today.toISOString())
     .not('received_at', 'is', null)
     .order('received_at', { ascending: false })
-    .limit(20);
+    .limit(50);
+
+  allTodayReceipts = data || [];
+  filterToday();
+  updateManualBadge();
+}
+
+function filterToday() {
+  const q = (document.getElementById('history-search-today').value || '').toLowerCase();
+  const filtered = q ? allTodayReceipts.filter(r =>
+    (r.order_number||'').toLowerCase().includes(q) ||
+    (r.customer_name||'').toLowerCase().includes(q) ||
+    (r.tracking_number||'').toLowerCase().includes(q)
+  ) : allTodayReceipts;
 
   const el = document.getElementById('recent-list');
-  if (!data || data.length === 0) {
-    el.innerHTML = '<div class="empty-state">No receipts logged today yet</div>';
-    return;
-  }
-  el.innerHTML = data.map(r => `
-    <div class="receipt-row">
+  if (!filtered.length) { el.innerHTML = '<div class="empty-state">No receipts found</div>'; return; }
+  el.innerHTML = filtered.map(r => `
+    <div class="receipt-row" onclick="openReceiptDetail('${r.tracking_number}')" style="cursor:pointer">
       <div class="receipt-row-left">
-        <div class="receipt-order">${r.order_number || '--'}</div>
+        <div class="receipt-order">${r.order_number || '--'}${r.manual_check ? ' <span style="color:var(--amber);font-size:11px;font-weight:600">MANUAL</span>' : ''}</div>
         <div class="receipt-customer">${r.customer_name || '--'}</div>
         <div class="receipt-items">${r.tracking_number}</div>
+        ${r.notes ? '<div class="receipt-items" style="color:var(--text-2);font-style:italic">' + r.notes.substring(0,40) + (r.notes.length>40?'...':'') + '</div>' : ''}
       </div>
       <div class="receipt-meta">
         <div class="receipt-time">${new Date(r.received_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
@@ -1558,6 +1672,171 @@ async function loadRecent() {
     </div>
   `).join('');
 }
+window.filterToday = filterToday;
+
+function updateManualBadge() {
+  const count = allTodayReceipts.filter(r => r.manual_check).length;
+  const badge = document.getElementById('manual-count-badge');
+  if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+  else { badge.style.display = 'none'; }
+}
+
+// ---- Receipt detail ----
+async function openReceiptDetail(trackingNumber) {
+  showScreen('receipt');
+  document.getElementById('receipt-detail-content').innerHTML = '<div class="spinner" style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin 0.7s linear infinite;margin:48px auto;"></div>';
+
+  const { data: rm } = await db
+    .from('royal_mail')
+    .select('*')
+    .eq('tracking_number', trackingNumber)
+    .maybeSingle();
+
+  if (!rm) { document.getElementById('receipt-detail-content').innerHTML = '<div class="empty-state">Record not found</div>'; return; }
+
+  // Try to get rentals from Supercycle for items
+  let rentals = [];
+  if (rm.order_number) {
+    try {
+      const scData = await supercycle('getRentals', { orderName: rm.order_number });
+      rentals = scData.data || [];
+    } catch(e) {}
+  }
+
+  const receivedTime = rm.received_at ? new Date(rm.received_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '--';
+
+  document.getElementById('receipt-detail-content').innerHTML = `
+    <div class="confirm-card" style="margin-bottom:16px">
+      <div class="confirm-card-header">
+        <div class="label">Return received</div>
+        <h2>${rm.order_number || '--'}</h2>
+        <div class="sub">${rm.tracking_number}</div>
+      </div>
+      <div class="confirm-field">
+        <div class="field-label">Customer</div>
+        <div class="field-value">${rm.customer_name || '--'}</div>
+      </div>
+      <div class="confirm-field">
+        <div class="field-label">Postcode</div>
+        <div class="field-value mono">${rm.customer_postcode || '--'}</div>
+      </div>
+      <div class="confirm-field">
+        <div class="field-label">Received</div>
+        <div class="field-value">${receivedTime} by ${rm.received_by || '--'}</div>
+      </div>
+      ${rentals.length > 0 ? `
+      <div class="confirm-field">
+        <div class="field-label">Items</div>
+        <div class="items-list" style="margin-top:4px">
+          ${rentals.map(r => '<div class="item-pill">' + ((r.item && r.item.productTitle) || 'Item') + (r.item && r.item.variantTitle ? ' — ' + r.item.variantTitle : '') + '</div>').join('')}
+        </div>
+      </div>` : ''}
+    </div>
+
+    ${rm.manual_check ? `
+    <div style="background:var(--amber-light);border:1px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;margin-bottom:16px;">
+      This return is in Manual Checks — please verify the correct rental was marked as received.
+    </div>` : ''}
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;">
+      <div class="field-label" style="margin-bottom:8px">Notes</div>
+      <textarea id="receipt-notes" style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;min-height:80px;color:var(--text);background:var(--surface);" placeholder="Add notes about this return...">${rm.notes || ''}</textarea>
+      <button class="scan-btn" onclick="saveReceiptNotes('${rm.tracking_number}')" style="margin-top:10px;padding:12px;">Save notes</button>
+      <div id="notes-saved" style="display:none;font-size:13px;color:var(--green);margin-top:8px;font-weight:600;">Notes saved</div>
+    </div>
+  `;
+}
+window.openReceiptDetail = openReceiptDetail;
+
+async function saveReceiptNotes(trackingNumber) {
+  const notes = document.getElementById('receipt-notes').value.trim();
+  await db.from('royal_mail').update({ notes }).eq('tracking_number', trackingNumber);
+  document.getElementById('notes-saved').style.display = 'block';
+  setTimeout(() => { const el = document.getElementById('notes-saved'); if(el) el.style.display = 'none'; }, 2000);
+  // Update local cache
+  const r = allTodayReceipts.find(r => r.tracking_number === trackingNumber);
+  if (r) r.notes = notes;
+}
+window.saveReceiptNotes = saveReceiptNotes;
+
+function goBackFromReceipt() {
+  showScreen('scan');
+  loadRecent();
+}
+window.goBackFromReceipt = goBackFromReceipt;
+
+// ---- History tab ----
+async function loadHistory() {
+  const q = (document.getElementById('hist-search').value || '').trim().toLowerCase();
+  const date = document.getElementById('hist-date').value;
+  if (!q && !date) { document.getElementById('history-list').innerHTML = '<div class="empty-state">Enter a search term or date above</div>'; return; }
+
+  let query = db.from('royal_mail').select('tracking_number, order_number, customer_name, customer_email, received_at, received_by, notes, manual_check').not('received_at', 'is', null).order('received_at', { ascending: false }).limit(100);
+
+  if (date) {
+    const start = new Date(date); start.setHours(0,0,0,0);
+    const end = new Date(date); end.setHours(23,59,59,999);
+    query = query.gte('received_at', start.toISOString()).lte('received_at', end.toISOString());
+  }
+
+  const { data } = await query;
+  let results = data || [];
+
+  if (q) {
+    results = results.filter(r =>
+      (r.order_number||'').toLowerCase().includes(q) ||
+      (r.customer_name||'').toLowerCase().includes(q) ||
+      (r.customer_email||'').toLowerCase().includes(q) ||
+      (r.tracking_number||'').toLowerCase().includes(q)
+    );
+  }
+
+  const el = document.getElementById('history-list');
+  if (!results.length) { el.innerHTML = '<div class="empty-state">No results found</div>'; return; }
+  el.innerHTML = results.map(r => `
+    <div class="receipt-row" onclick="openReceiptDetail('${r.tracking_number}')" style="cursor:pointer">
+      <div class="receipt-row-left">
+        <div class="receipt-order">${r.order_number || '--'}${r.manual_check ? ' <span style="color:var(--amber);font-size:11px;font-weight:600">MANUAL</span>' : ''}</div>
+        <div class="receipt-customer">${r.customer_name || '--'}</div>
+        <div class="receipt-items">${r.tracking_number}</div>
+        ${r.notes ? '<div class="receipt-items" style="color:var(--text-2);font-style:italic">' + r.notes.substring(0,40) + (r.notes.length>40?'...':'') + '</div>' : ''}
+      </div>
+      <div class="receipt-meta">
+        <div class="receipt-time">${new Date(r.received_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</div>
+        <span class="receipt-by">${r.received_by}</span>
+      </div>
+    </div>
+  `).join('');
+}
+window.loadHistory = loadHistory;
+
+// ---- Manual checks tab ----
+async function loadManualChecks() {
+  const { data } = await db
+    .from('royal_mail')
+    .select('tracking_number, order_number, customer_name, received_at, received_by, notes')
+    .eq('manual_check', true)
+    .not('received_at', 'is', null)
+    .order('received_at', { ascending: false });
+
+  const el = document.getElementById('manual-list');
+  if (!data || !data.length) { el.innerHTML = '<div class="empty-state">No items in manual checks</div>'; return; }
+  el.innerHTML = data.map(r => `
+    <div class="receipt-row" onclick="openReceiptDetail('${r.tracking_number}')" style="cursor:pointer">
+      <div class="receipt-row-left">
+        <div class="receipt-order">${r.order_number || '--'}</div>
+        <div class="receipt-customer">${r.customer_name || '--'}</div>
+        <div class="receipt-items">${r.tracking_number}</div>
+        ${r.notes ? '<div class="receipt-items" style="color:var(--text-2);font-style:italic">' + r.notes.substring(0,40) + (r.notes.length>40?'...':'') + '</div>' : ''}
+      </div>
+      <div class="receipt-meta">
+        <div class="receipt-time">${new Date(r.received_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</div>
+        <span class="receipt-by">${r.received_by}</span>
+      </div>
+    </div>
+  `).join('');
+}
+window.loadManualChecks = loadManualChecks;
 
 // ---- Loading ----
 function showLoading(text) {
