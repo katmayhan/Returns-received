@@ -964,6 +964,11 @@
 
   <button class="other-orders-btn" id="other-orders-btn" onclick="toggleOtherOrders()">Items don't match? View customer's other orders</button>
 
+  <button class="other-orders-btn" id="manual-check-always-btn" onclick="addToManualChecks()" style="border-color:#f59e0b;color:#92400e;">
+    &#9873; Add to Manual Checks
+  </button>
+  <div id="manual-check-added-always" style="display:none;text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-bottom:4px;">Added to Manual Checks</div>
+
   <div class="other-orders-panel" id="other-orders-panel">
     <div class="other-orders-loading" id="other-orders-loading">Loading other orders...</div>
     <div id="other-orders-list"></div>
@@ -1529,8 +1534,15 @@ async function addToManualChecks() {
   await db.from('royal_mail')
     .update({ manual_check: true })
     .eq('tracking_number', currentReturn.rm.tracking_number);
-  document.getElementById('manual-check-btn').style.display = 'none';
-  document.getElementById('manual-check-added').style.display = 'block';
+  // Update both the replacement banner button and the always-visible button
+  const btn1 = document.getElementById('manual-check-btn');
+  const added1 = document.getElementById('manual-check-added');
+  const btn2 = document.getElementById('manual-check-always-btn');
+  const added2 = document.getElementById('manual-check-added-always');
+  if (btn1) btn1.style.display = 'none';
+  if (added1) added1.style.display = 'block';
+  if (btn2) btn2.style.display = 'none';
+  if (added2) added2.style.display = 'block';
 }
 window.addToManualChecks = addToManualChecks;
 
