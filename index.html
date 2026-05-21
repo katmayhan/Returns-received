@@ -1828,8 +1828,7 @@ async function loadManualChecks() {
     .from('royal_mail')
     .select('tracking_number, order_number, customer_name, received_at, received_by, notes')
     .eq('manual_check', true)
-    .not('received_at', 'is', null)
-    .order('received_at', { ascending: false });
+    .order('received_at', { ascending: false, nullsFirst: false });
 
   const el = document.getElementById('manual-list');
   if (!data || !data.length) { el.innerHTML = '<div class="empty-state">No items in manual checks</div>'; return; }
@@ -1842,8 +1841,8 @@ async function loadManualChecks() {
         ${r.notes ? '<div class="receipt-items" style="color:var(--text-2);font-style:italic">' + r.notes.substring(0,40) + (r.notes.length>40?'...':'') + '</div>' : ''}
       </div>
       <div class="receipt-meta">
-        <div class="receipt-time">${new Date(r.received_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</div>
-        <span class="receipt-by">${r.received_by}</span>
+        <div class="receipt-time">${r.received_at ? new Date(r.received_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : 'Not yet received'}</div>
+        ${r.received_by ? '<span class="receipt-by">' + r.received_by + '</span>' : '<span class="receipt-by" style="background:var(--amber-light);color:var(--amber);border-color:#fcd34d;">Pending</span>'}
       </div>
     </div>
   `).join('');
