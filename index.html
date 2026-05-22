@@ -1891,6 +1891,13 @@ async function openReceiptDetail(trackingNumber) {
     <div id="mark-received-done" style="display:none;text-align:center;font-size:14px;color:var(--green);font-weight:600;margin-bottom:12px;">Marked as received</div>
     ` : ''}
 
+    ${rm.manual_check ? `
+    <button class="other-orders-btn" onclick="resolveManualCheck('${rm.tracking_number}')" id="resolve-manual-btn" style="border-color:var(--green);color:var(--green);margin-top:8px;">
+      Remove from Manual Checks
+    </button>
+    <div id="resolve-manual-done" style="display:none;text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-top:6px;">Removed from Manual Checks</div>
+    ` : ''}
+
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;">
       <div class="field-label" style="margin-bottom:8px">Notes</div>
       <textarea id="receipt-notes" style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;min-height:80px;color:var(--text);background:var(--surface);" placeholder="Add notes about this return...">${rm.notes || ''}</textarea>
@@ -1906,17 +1913,46 @@ async function markReceivedFromDetail(trackingNumber) {
   const btn = document.getElementById('mark-received-detail-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Marking...'; }
   const now = new Date().toISOString();
+
+  // Get the order number to look up Supercycle rentals
+  const { data: rm } = await db.from('royal_mail').select('order_number').eq('tracking_number', trackingNumber).maybeSingle();
+
+  // Fire Supercycle for each active rental on this order
+  if (rm && rm.order_number) {
+    try {
+      const scData = await supercycle('getRentals', { orderName: rm.order_number });
+      const rentals = (scData.data || []).filter(r => r.receivalStatus !== 'complete');
+      for (const rental of rentals) {
+        try { await supercycle('createReturn', { rentalId: rental.id }); } catch(e) { console.warn('Supercycle error for rental', rental.id, e); }
+      }
+    } catch(e) { console.warn('Supercycle lookup failed', e); }
+  }
+
   await db.from('royal_mail').update({
     received_at: now,
     received_by: currentStaff,
-    status: 'received'
+    status: 'received',
+    receipt_status: 'received'
   }).eq('tracking_number', trackingNumber);
+
   if (btn) btn.style.display = 'none';
   const done = document.getElementById('mark-received-done');
   if (done) done.style.display = 'block';
   loadRecent();
 }
 window.markReceivedFromDetail = markReceivedFromDetail;
+
+async function resolveManualCheck(trackingNumber) {
+  const btn = document.getElementById('resolve-manual-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Removing...'; }
+  await db.from('royal_mail').update({ manual_check: false }).eq('tracking_number', trackingNumber);
+  if (btn) btn.style.display = 'none';
+  const done = document.getElementById('resolve-manual-done');
+  if (done) done.style.display = 'block';
+  loadManualChecks();
+  updateManualBadge();
+}
+window.resolveManualCheck = resolveManualCheck;
 
 async function saveReceiptNotes(trackingNumber) {
   const notes = document.getElementById('receipt-notes').value.trim();
