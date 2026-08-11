@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baboodle · Incomplete returns</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --bg: #f9fafb;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --text-2: #6b7280;
+    --text-3: #9ca3af;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── App shell ── */
+  body { background: var(--bg); }
+
+  .header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-logo { font-size: 16px; font-weight: 700; }
+  .header-logo span { color: var(--red); }
+  .main {
+    max-width: 1100px; margin: 0 auto; padding: 28px 32px;
+  }
+
+  .page-title-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .page-title { font-size: 20px; font-weight: 700; }
+  .refresh-btn {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer;
+  }
+  .refresh-btn:hover { background: var(--bg); }
+  .page-sub { color: var(--text-2); font-size: 14px; margin-bottom: 20px; }
+
+  .toolbar {
+    display: flex; gap: 10px; align-items: center; margin-bottom: 18px;
+  }
+  .toolbar input[type="text"] {
+    flex: 1; max-width: 320px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 9px 12px; font-size: 14px; outline: none;
+  }
+  .toolbar input[type="text"]:focus { border-color: var(--red); }
+  .tab-toggle { display: flex; gap: 2px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 2px; }
+  .tab-toggle button {
+    border: none; background: transparent; padding: 7px 14px; font-size: 13px; font-weight: 600;
+    color: var(--text-2); border-radius: 5px; cursor: pointer;
+  }
+  .tab-toggle button.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+  .count-bar { font-size: 13px; color: var(--text-2); margin-bottom: 14px; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  thead th {
+    text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--text-3); padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--bg);
+  }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--bg); }
+
+  .order-cell { font-weight: 700; font-family: 'DM Mono', monospace; font-size: 13px; }
+  .tracking-cell { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-2); margin-top: 2px; }
+  .product-cell { font-weight: 500; }
+  .variant-cell { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+  .notes-cell { color: #92400e; font-style: italic; max-width: 260px; }
+  .meta-cell { font-size: 12px; color: var(--text-2); }
+  .resolve-btn {
+    background: var(--surface); border: 1px solid var(--green); color: var(--green);
+    border-radius: var(--radius-sm); padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
+    white-space: nowrap;
+  }
+  .resolve-btn:hover { background: var(--green-light); }
+  .resolve-btn:disabled { opacity: 0.5; cursor: default; }
+  .resolved-pill {
+    display: inline-block; background: var(--green-light); color: var(--green);
+    font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px;
+  }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-3); font-size: 14px; }
+  .loading-state { text-align: center; padding: 60px 20px; color: var(--text-2); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">Baboodle <span>&middot;</span> Incomplete Returns</div>
+</div>
+
+<div class="app">
+  <div class="main">
+    <div class="page-title-row">
+      <div class="page-title">Incomplete returns</div>
+      <button class="refresh-btn" onclick="loadItems()">Refresh</button>
+    </div>
+    <div class="page-sub">Products flagged by the warehouse as incomplete on receipt. Nothing has been cancelled in Supercycle for these &mdash; check them, cancel manually there, then mark resolved.</div>
+
+    <div class="toolbar">
+      <input type="text" id="search-input" placeholder="Search order, product, tracking..." oninput="render()">
+      <div class="tab-toggle">
+        <button class="active" id="tab-open" onclick="switchTab('open')">Open</button>
+        <button id="tab-resolved" onclick="switchTab('resolved')">Resolved</button>
+      </div>
+    </div>
+
+    <div class="count-bar" id="count-bar"></div>
+    <div id="table-wrap">
+      <div class="loading-state">Loading&hellip;</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://rousljiuoswvbszgfmys.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdXNsaml1b3N3dmJzemdmbXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTkwMDYsImV4cCI6MjA5MTEzNTAwNn0.pIz0ESqkXP6wqjI4H0sOOR-5diZTSQzSh9bksRLzaI0';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentTab = 'open';
+let allItems = [];
+
+loadItems();
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-open').classList.toggle('active', tab === 'open');
+  document.getElementById('tab-resolved').classList.toggle('active', tab === 'resolved');
+  render();
+}
+
+async function loadItems() {
+  document.getElementById('table-wrap').innerHTML = '<div class="loading-state">Loading&hellip;</div>';
+  const { data, error } = await db
+    .from('incomplete_receipts')
+    .select('id, tracking_number, order_number, product_title, variant_title, missing_notes, flagged_by, flagged_at, resolved, resolved_by, resolved_at')
+    .order('flagged_at', { ascending: false });
+
+  if (error) {
+    document.getElementById('table-wrap').innerHTML = '<div class="empty-state">Failed to load: ' + error.message + '</div>';
+    return;
+  }
+  allItems = data || [];
+  render();
+}
+
+function render() {
+  const q = (document.getElementById('search-input').value || '').toLowerCase();
+  let items = allItems.filter(i => currentTab === 'open' ? !i.resolved : i.resolved);
+  if (q) {
+    items = items.filter(i =>
+      (i.order_number || '').toLowerCase().includes(q) ||
+      (i.product_title || '').toLowerCase().includes(q) ||
+      (i.tracking_number || '').toLowerCase().includes(q)
+    );
+  }
+
+  document.getElementById('count-bar').textContent =
+    items.length + (currentTab === 'open' ? ' open item' : ' resolved item') + (items.length === 1 ? '' : 's');
+
+  const wrap = document.getElementById('table-wrap');
+  if (!items.length) {
+    wrap.innerHTML = '<div class="empty-state">' + (currentTab === 'open' ? 'Nothing outstanding right now.' : 'No resolved items yet.') + '</div>';
+    return;
+  }
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Product</th>
+          <th>What's missing</th>
+          <th>Flagged</th>
+          <th>${currentTab === 'open' ? '' : 'Resolved'}</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${items.map(i => `
+          <tr>
+            <td>
+              <div class="order-cell">${i.order_number || '--'}</div>
+              <div class="tracking-cell">${i.tracking_number || ''}</div>
+            </td>
+            <td>
+              <div class="product-cell">${i.product_title || 'Item'}</div>
+              ${i.variant_title ? '<div class="variant-cell">' + i.variant_title + '</div>' : ''}
+            </td>
+            <td class="notes-cell">${i.missing_notes || '--'}</td>
+            <td class="meta-cell">
+              ${i.flagged_at ? new Date(i.flagged_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '--'}<br>
+              by ${i.flagged_by || '--'}
+            </td>
+            <td>
+              ${currentTab === 'open'
+                ? '<button class="resolve-btn" onclick="resolveItem(' + i.id + ', this)">Mark resolved</button>'
+                : '<span class="resolved-pill">Resolved</span><div class="meta-cell" style="margin-top:4px">' + (i.resolved_by || '') + '</div>'
+              }
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+async function resolveItem(id, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  const { error } = await db.from('incomplete_receipts').update({
+    resolved: true,
+    resolved_at: new Date().toISOString()
+  }).eq('id', id);
+
+  if (error) {
+    alert('Failed to update: ' + error.message);
+    btn.disabled = false;
+    btn.textContent = 'Mark resolved';
+    return;
+  }
+  await loadItems();
+}
+window.resolveItem = resolveItem;
+</script>
+</body>
+</html>
