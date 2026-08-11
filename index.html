@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Baboodle · Returns</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --red-mid: #fee2e2;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --bg: #f9fafb;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --text-2: #6b7280;
+    --text-3: #9ca3af;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .header-logo span { color: var(--red); }
+  .staff-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    color: var(--text-2);
+  }
+  .staff-chip:active { background: var(--border); }
+
+  /* ── Screen system ── */
+  .screen { display: none; padding: 16px; }
+  .screen.active { display: block; }
+
+  /* ── Staff picker ── */
+  .staff-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    gap: 32px;
+    z-index: 500;
+  }
+  .staff-screen.active { display: flex; }
+  .staff-logo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .staff-logo span { color: var(--red); }
+  .staff-prompt {
+    text-align: center;
+  }
+  .staff-prompt h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .staff-prompt p { color: var(--text-2); font-size: 15px; }
+  .staff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .staff-btn {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    color: var(--text);
+  }
+  .staff-btn:active { background: var(--red-light); border-color: var(--red); color: var(--red); transform: scale(0.97); }
+
+  /* ── Scan screen ── */
+  .scan-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .scan-card-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .scan-card-header h2 { font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+  .scan-card-header p { font-size: 13px; color: var(--text-2); }
+  .scan-card-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  .scanner-target {
+    background: var(--bg);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 28px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .scanner-target:active, .scanner-target.focused {
+    border-color: var(--red);
+    background: var(--red-light);
+  }
+  .scanner-label { font-size: 16px; font-weight: 700; color: var(--text); }
+  .scanner-sub { font-size: 13px; color: var(--text-2); }
+
+  .scan-btn {
+    width: 100%;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.15s;
+  }
+  .scan-btn:active { opacity: 0.85; }
+  .scan-btn.secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-3);
+    font-size: 12px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .track-input {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+    text-transform: uppercase;
+  }
+  .track-input:focus { border-color: var(--red); }
+  .track-input::placeholder { color: var(--text-3); text-transform: none; font-family: 'DM Sans', sans-serif; }
+
+  /* ── Recent receipts ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    margin-bottom: 8px;
+    padding: 0 2px;
+  }
+  .receipt-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .receipt-row-left { flex: 1; min-width: 0; }
+  .receipt-order {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--red);
+    margin-bottom: 2px;
+  }
+  .receipt-customer { font-size: 14px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .receipt-items { font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .receipt-meta { text-align: right; flex-shrink: 0; }
+  .receipt-time { font-size: 12px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+  .receipt-by {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: var(--text-2);
+    margin-top: 4px;
+    display: inline-block;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-3);
+    font-size: 14px;
+  }
+
+  /* ── Confirm screen ── */
+  .confirm-screen.active { display: block; }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-2);
+    font-size: 14px;
+    font-weight: 500;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 16px;
+  }
+
+  .confirm-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .confirm-card-header {
+    background: var(--red);
+    padding: 16px;
+    color: white;
+  }
+  .confirm-card-header .label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+  .confirm-card-header h2 { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; }
+  .confirm-card-header .sub { font-size: 14px; opacity: 0.85; margin-top: 2px; }
+
+  .confirm-field {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .confirm-field:last-child { border-bottom: none; }
+  .confirm-field .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    margin-bottom: 4px;
+  }
+  .confirm-field .field-value { font-size: 15px; font-weight: 500; }
+  .confirm-field .field-value.mono { font-family: 'DM Mono', monospace; font-size: 14px; }
+
+  .items-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .item-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .item-pill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-3);
+    flex-shrink: 0;
+  }
+
+  .flag-banner {
+    margin: 0 16px 16px;
+    background: var(--amber-light);
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .flag-banner .flag-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .flag-banner .flag-text { font-size: 13px; font-weight: 600; color: #92400e; }
+
+  .confirm-btn {
+    width: 100%;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    margin-bottom: 10px;
+  }
+  .confirm-btn:active { opacity: 0.85; }
+  .confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Success screen ── */
+  .success-screen {
+    min-height: calc(100dvh - 57px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    gap: 24px;
+    text-align: center;
+  }
+  .success-screen.active { display: flex; }
+
+  .success-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--green-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .success-title { font-size: 24px; font-weight: 700; }
+  .success-sub { color: var(--text-2); font-size: 15px; }
+  .success-detail {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    width: 100%;
+    max-width: 320px;
+    text-align: left;
+  }
+  .success-detail .sd-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .success-detail .sd-row:last-child { border-bottom: none; }
+  .success-detail .sd-label { color: var(--text-2); }
+  .success-detail .sd-value { font-weight: 600; font-family: 'DM Mono', monospace; font-size: 13px; }
+
+  .next-btn {
+    width: 100%;
+    max-width: 320px;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* ── Error state ── */
+  .error-banner {
+    background: var(--red-light);
+    border: 1px solid var(--red-mid);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--red);
+    font-weight: 500;
+    margin-bottom: 12px;
+    display: none;
+  }
+  .error-banner.visible { display: block; }
+
+  /* ── Loading ── */
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .loading-overlay.visible { display: flex; }
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; color: var(--text-2); font-weight: 500; }
+
+  /* ── Camera modal ── */
+  .camera-modal {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 300;
+    display: none;
+    flex-direction: column;
+  }
+  .camera-modal.visible { display: flex; }
+  #camera-video {
+    flex: 1;
+    width: 100%;
+    object-fit: cover;
+  }
+  .camera-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .scan-frame {
+    width: 240px;
+    height: 120px;
+    border: 2px solid white;
+    border-radius: 8px;
+    position: relative;
+  }
+  .scan-frame::before, .scan-frame::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: var(--red);
+    border-style: solid;
+  }
+  .scan-frame::before { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 8px 0 0 0; }
+  .scan-frame::after { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 8px 0; }
+  .scan-hint {
+    color: white;
+    font-size: 14px;
+    margin-top: 20px;
+    opacity: 0.8;
+    font-weight: 500;
+  }
+  .camera-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+  }
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--red);
+    animation: scanline 1.5s ease-in-out infinite;
+  }
+  @keyframes scanline {
+    0% { top: 10%; opacity: 1; }
+    50% { top: 85%; opacity: 1; }
+    100% { top: 10%; opacity: 1; }
+  }
+
+  /* -- Issue logging -- */
+  .issue-toggle-btn {
+    width: 100%;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    margin-top: 4px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .issue-toggle-btn:active { background: var(--bg); }
+  .issue-panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .issue-panel.hidden { display: none; }
+  .issue-panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .issue-select {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+  }
+  .issue-select:focus { border-color: var(--red); }
+  .issue-textarea {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    resize: none;
+    min-height: 80px;
+  }
+  .issue-textarea:focus { border-color: var(--red); }
+  .issue-photo-btn {
+    width: 100%;
+    background: var(--bg);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .issue-photo-btn.has-photo {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-light);
+  }
+  .issue-photo-preview {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    max-height: 200px;
+    object-fit: cover;
+    display: none;
+  }
+  .issue-photo-preview.visible { display: block; }
+
+  /* -- Tabs -- */
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 14px 16px 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
+  .tab-btn:active { opacity: 0.7; }
+
+  /* -- Other orders panel -- */
+  .other-orders-btn {
+    width: 100%;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .other-orders-btn:active { background: var(--bg); }
+  .other-orders-panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .other-orders-panel.visible { display: block; }
+  .other-order-row {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .other-order-row:last-child { border-bottom: none; }
+  .other-order-row:active { background: var(--bg); }
+  .other-order-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--red);
+  }
+  .other-order-items {
+    font-size: 12px;
+    color: var(--text-2);
+    margin-top: 2px;
+  }
+  .other-order-select {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+  .other-orders-loading {
+    padding: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-3);
+  }
+
+  /* -- Item checklist -- */
+  .checklist-intro {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 12px;
+  }
+  .rental-item {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .rental-item.checked {
+    border-color: var(--green);
+    background: var(--green-light);
+  }
+  .rental-item.already-received {
+    border-color: var(--border);
+    background: var(--bg);
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .rental-checkbox {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+    transition: all 0.15s;
+  }
+  .rental-item.checked .rental-checkbox {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+  .rental-item-info { flex: 1; min-width: 0; }
+  .rental-item-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .rental-item-sub { font-size: 12px; color: var(--text-2); }
+  .rental-item-badge {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    padding: 3px 7px;
+    border-radius: 4px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+  .rental-item.already-received .rental-item-badge {
+    background: var(--green-light);
+    color: var(--green);
+    border-color: var(--green);
+  }
+  .no-rentals {
+    background: var(--amber-light);
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 12px;
+  }
+  .rental-item.incomplete-flag {
+    border-color: #f59e0b;
+    background: var(--amber-light);
+  }
+  .rental-item.incomplete-flag .rental-checkbox {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+  }
+  .multipart-tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: #92400e;
+    margin-top: 2px;
+  }
+
+  /* -- Complete-check modal -- */
+  .complete-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(17,24,39,0.55);
+    z-index: 600;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .complete-modal.visible { display: flex; }
+  .complete-modal-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 20px;
+    max-width: 360px;
+    width: 100%;
+  }
+  .complete-modal-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .complete-modal-sub { font-size: 13px; color: var(--text-2); margin-bottom: 16px; }
+  .complete-modal-notes {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    resize: none;
+    min-height: 70px;
+    color: var(--text);
+    background: var(--surface);
+    margin-bottom: 10px;
+  }
+  .complete-modal-cancel {
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text-3);
+    font-size: 13px;
+    margin-top: 10px;
+    padding: 8px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Looking up return…</div>
+</div>
+
+<!-- Camera modal -->
+<div class="camera-modal" id="camera-modal">
+  <video id="camera-video" autoplay playsinline muted></video>
+  <div class="camera-overlay">
+    <div class="scan-frame">
+      <div class="scan-line"></div>
+    </div>
+    <div class="scan-hint">Hold barcode within frame</div>
+  </div>
+  <button class="camera-close" id="camera-close">✕</button>
+</div>
+
+<!-- Complete-check modal -->
+<div class="complete-modal" id="complete-modal">
+  <div class="complete-modal-card">
+    <div class="complete-modal-title" id="complete-modal-title">Is this complete?</div>
+    <div class="complete-modal-sub" id="complete-modal-sub">This product is often sent in multiple parts. Confirm the full item is present before we cancel it in Supercycle.</div>
+    <button class="scan-btn" style="margin-bottom:8px;" onclick="resolveCompleteModal(true)">Yes — all parts present</button>
+    <button class="scan-btn secondary" style="margin-bottom:0;" onclick="resolveCompleteModal(false)">No — parts missing</button>
+    <div id="complete-modal-missing" style="display:none;margin-top:12px;">
+      <textarea id="complete-modal-notes" class="complete-modal-notes" placeholder="What's missing? e.g. seat unit still to come"></textarea>
+      <button class="scan-btn" style="background:#f59e0b;" onclick="confirmIncompleteItem()">Flag as incomplete — don't cancel</button>
+    </div>
+    <button class="complete-modal-cancel" onclick="closeCompleteModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- Header -->
+<div class="header" id="main-header" style="display:none">
+  <div class="header-logo">Baboodle <span>·</span> Returns</div>
+  <div class="staff-chip" id="staff-chip-btn">–</div>
+</div>
+
+<!-- SCREEN: Staff picker -->
+<div class="screen staff-screen active" id="screen-staff">
+  <div class="staff-logo">Baboodle <span>·</span> Returns</div>
+  <div class="staff-prompt">
+    <h2>Who are you?</h2>
+    <p>Select your name to get started</p>
+  </div>
+  <div class="staff-grid">
+    <button class="staff-btn" onclick="selectStaff('Connor')">Connor</button>
+    <button class="staff-btn" onclick="selectStaff('Ennis')">Ennis</button>
+    <button class="staff-btn" onclick="selectStaff('Clive')">Clive</button>
+    <button class="staff-btn" onclick="selectStaff('Dan')">Dan</button>
+  </div>
+</div>
+
+<!-- SCREEN: Scan -->
+<div class="screen" id="screen-scan">
+
+  <!-- Tab nav -->
+  <div style="display:flex;border-bottom:2px solid var(--border);margin:-16px -16px 16px;background:var(--surface);padding:0 16px;position:sticky;top:57px;z-index:50;">
+    <button class="tab-btn active" id="tab-log" onclick="switchTab('log')">Log a return</button>
+    <button class="tab-btn" id="tab-history" onclick="switchTab('history')">History</button>
+    <button class="tab-btn" id="tab-manual" onclick="switchTab('manual')">Manual checks <span id="manual-count-badge" style="display:none;background:var(--red);color:white;border-radius:10px;padding:1px 6px;font-size:11px;margin-left:4px"></span></button>
+    <button class="tab-btn" id="tab-incomplete" onclick="switchTab('incomplete')">Incomplete <span id="incomplete-count-badge" style="display:none;background:#f59e0b;color:white;border-radius:10px;padding:1px 6px;font-size:11px;margin-left:4px"></span></button>
+  </div>
+
+  <!-- LOG TAB -->
+  <div id="tab-content-log">
+      <!-- Scanner input: inputmode=none prevents soft keyboard on Android -->
+      <input id="track-input" type="text" inputmode="none" autocomplete="off" autocorrect="off" spellcheck="false"
+        class="track-input" placeholder="Waiting for scan..."
+        style="text-align:center;font-size:14px;color:var(--text-3);cursor:default;margin-bottom:10px;">
+
+      <div class="scanner-target" id="scanner-target-el" style="margin-bottom:10px;">
+        <svg width="36" height="36" fill="none" stroke="#dc2626" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 5h2M7 5h1M3 5v2M21 5h-2M17 5h-1M21 5v2M3 19h2M7 19h1M3 19v-2M21 19h-2M17 19h-1M21 19v-2"/><line x1="4" y1="12" x2="20" y2="12" stroke="#dc2626" stroke-width="2"/></svg>
+        <div class="scanner-label">Ready to scan</div>
+        <div class="scanner-sub">Point scanner at the Royal Mail barcode and pull trigger</div>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+        <input id="manual-input" type="text" placeholder="Type tracking number manually"
+          autocomplete="off" autocorrect="off" spellcheck="false"
+          class="track-input" style="flex:1;margin:0;">
+        <button class="scan-btn" onclick="lookupManual()" style="width:auto;padding:14px 16px;margin:0;flex-shrink:0;">Go</button>
+      </div>
+      <div class="error-banner" id="scan-error">Unable to match this tracking number. Please check and try again.</div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+    <div class="section-label" style="margin:0">Received today</div>
+    <input id="history-search-today" type="text" placeholder="Search..." autocomplete="off"
+      style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;font-size:13px;outline:none;width:160px;background:var(--surface);color:var(--text);"
+      oninput="filterToday()">
+  </div>
+  <div id="recent-list">
+    <div class="empty-state">No receipts logged today yet</div>
+  </div>
+  </div> <!-- end tab-content-log -->
+
+  <!-- HISTORY TAB -->
+  <div id="tab-content-history" style="display:none">
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      <input id="hist-search" type="text" placeholder="Search order, customer, email, tracking..." autocomplete="off"
+        style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;outline:none;background:var(--surface);color:var(--text);"
+        oninput="loadHistory()">
+      <div style="display:flex;gap:8px;">
+        <select id="hist-day" style="flex:1;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 8px;font-size:14px;background:var(--surface);color:var(--text);outline:none;">
+          <option value="">Day</option>
+          <option value="01">1</option>
+<option value="02">2</option>
+<option value="03">3</option>
+<option value="04">4</option>
+<option value="05">5</option>
+<option value="06">6</option>
+<option value="07">7</option>
+<option value="08">8</option>
+<option value="09">9</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+        </select>
+        <select id="hist-month" style="flex:1.5;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 8px;font-size:14px;background:var(--surface);color:var(--text);outline:none;">
+          <option value="">Month</option>
+          <option value="01">Jan</option>
+<option value="02">Feb</option>
+<option value="03">Mar</option>
+<option value="04">Apr</option>
+<option value="05">May</option>
+<option value="06">Jun</option>
+<option value="07">Jul</option>
+<option value="08">Aug</option>
+<option value="09">Sep</option>
+<option value="10">Oct</option>
+<option value="11">Nov</option>
+<option value="12">Dec</option>
+        </select>
+        <select id="hist-year" style="flex:1.2;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 8px;font-size:14px;background:var(--surface);color:var(--text);outline:none;">
+          <option value="">Year</option>
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+        </select>
+      </div>
+      <button class="scan-btn secondary" onclick="loadHistory()">Search</button>
+    </div>
+    <div id="history-list"><div class="empty-state">Enter a search term or date above</div></div>
+  </div>
+
+  <!-- MANUAL CHECKS TAB -->
+  <div id="tab-content-manual" style="display:none">
+    <div style="background:var(--amber-light);border:1px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;margin-bottom:16px;">
+      These returns need manual verification before marking as received.
+    </div>
+    <div id="manual-list"><div class="empty-state">No items in manual checks</div></div>
+  </div>
+
+  <!-- INCOMPLETE TAB -->
+  <div id="tab-content-incomplete" style="display:none">
+    <div style="background:var(--amber-light);border:1px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;margin-bottom:16px;">
+      These returns were flagged as incomplete on receipt. Nothing has been cancelled in Supercycle yet — check the item, cancel it manually there, then resolve it here.
+    </div>
+    <div id="incomplete-list"><div class="empty-state">No incomplete returns flagged</div></div>
+  </div>
+
+</div>
+
+<!-- SCREEN: Receipt detail -->
+<div class="screen" id="screen-receipt">
+  <button class="back-btn" onclick="goBackFromReceipt()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back
+  </button>
+  <div id="receipt-detail-content"></div>
+</div>
+
+<!-- SCREEN: Confirm -->
+<div class="screen" id="screen-confirm">
+  <button class="back-btn" onclick="goBack()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back
+  </button>
+
+  <div class="confirm-card" id="confirm-card">
+    <div class="confirm-card-header">
+      <div class="label">Return found</div>
+      <h2 id="confirm-order">-</h2>
+      <div class="sub" id="confirm-tracking">-</div>
+    </div>
+    <div class="confirm-field">
+      <div class="field-label">Customer</div>
+      <div class="field-value" id="confirm-customer">-</div>
+    </div>
+    <div class="confirm-field">
+      <div class="field-label">Postcode</div>
+      <div class="field-value mono" id="confirm-postcode">-</div>
+    </div>
+  </div>
+
+  <div id="match-warning" style="display:none;margin-bottom:16px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;">
+    &#9888; Order number and email don't match. Please manually confirm in Supercycle before confirming receipt.
+  </div>
+
+  <div id="replacement-warning" style="display:none;margin-bottom:16px;background:#fef3c7;border:2px solid #f59e0b;border-radius:8px;padding:14px;font-size:13px;font-weight:600;color:#92400e;">
+    &#9888; Replacement return. Add to Manual Checks to make sure we are cancelling the correct rental.
+    <button onclick="addToManualChecks()" style="display:block;margin-top:10px;background:#f59e0b;color:white;border:none;border-radius:6px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;" id="manual-check-btn">Add to Manual Checks</button>
+    <div id="manual-check-added" style="display:none;margin-top:8px;color:#16a34a;font-weight:600;">Added to Manual Checks</div>
+  </div>
+
+  <div id="partial-banner" style="display:none;margin-bottom:16px;background:#eff6ff;border:2px solid #3b82f6;border-radius:8px;padding:14px;font-size:13px;color:#1e40af;">
+    <div style="font-weight:700;margin-bottom:4px;">Partial return already logged for this order</div>
+    <div id="partial-banner-note" style="font-style:italic;"></div>
+    <div style="margin-top:6px;font-size:12px;color:#3b82f6;">Confirm full receipt below to stop billing.</div>
+  </div>
+
+  <div class="section-label" style="margin-top:8px">Items on this order</div>
+  <div class="checklist-intro">Tick each item you are physically receiving in this box</div>
+  <div id="rental-checklist"></div>
+
+  <button class="other-orders-btn" id="other-orders-btn" onclick="toggleOtherOrders()">Items don't match? View customer's other orders</button>
+
+  <button class="other-orders-btn" id="manual-check-always-btn" onclick="addToManualChecks()" style="border-color:#f59e0b;color:#92400e;">
+    &#9873; Add to Manual Checks
+  </button>
+  <div id="manual-check-added-always" style="display:none;text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-bottom:4px;">Added to Manual Checks</div>
+
+  <div class="other-orders-panel" id="other-orders-panel">
+    <div class="other-orders-loading" id="other-orders-loading">Loading other orders...</div>
+    <div id="other-orders-list"></div>
+  </div>
+
+  <!-- Issue logging -->
+  <button class="issue-toggle-btn" id="issue-toggle-btn" onclick="toggleIssuePanel()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Log an issue with this return
+  </button>
+
+  <div class="issue-panel hidden" id="issue-panel">
+    <div class="issue-panel-title">Issue details</div>
+    <select class="issue-select" id="issue-type">
+      <option value="">Select issue type...</option>
+      <option value="incomplete_return">Incomplete return — items missing</option>
+      <option value="damaged">Damaged item</option>
+      <option value="missing_part">Missing part</option>
+      <option value="wrong_item">Wrong item returned</option>
+      <option value="other">Other</option>
+    </select>
+    <textarea class="issue-textarea" id="issue-notes" placeholder="Describe the issue..."></textarea>
+    <input type="file" id="issue-photo-input" accept="image/*" capture="environment" style="display:none;">
+    <button class="issue-photo-btn" id="issue-photo-btn" onclick="document.getElementById('issue-photo-input').click()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      Add photo (optional)
+    </button>
+    <img class="issue-photo-preview" id="issue-photo-preview" alt="Issue photo">
+  </div>
+
+  <button class="confirm-btn" id="confirm-btn" onclick="confirmReceipt()" style="margin-top:8px">
+    Confirm receipt
+  </button>
+
+  <button class="other-orders-btn" id="partial-btn" onclick="togglePartialPanel()" style="margin-top:6px;border-color:#3b82f6;color:#1e40af;">
+    Mark as partially received
+  </button>
+  <div id="partial-panel" style="display:none;background:#eff6ff;border:1px solid #3b82f6;border-radius:8px;padding:14px;margin-top:8px;">
+    <div style="font-size:13px;font-weight:600;color:#1e40af;margin-bottom:8px;">Which part was received?</div>
+    <textarea id="partial-notes" style="width:100%;border:1px solid #93c5fd;border-radius:6px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;min-height:70px;color:var(--text);background:var(--surface);" placeholder="e.g. Main frame received, extension set still to come"></textarea>
+    <button class="scan-btn" onclick="confirmPartial()" style="margin-top:10px;background:#3b82f6;">Save partial receipt</button>
+  </div>
+  <div class="error-banner" id="confirm-error">Failed to log receipt. Please try again.</div>
+</div>
+
+<!-- SCREEN: Success -->
+<div class="screen success-screen" id="screen-success">
+  <div class="success-icon">✓</div>
+  <div>
+    <div class="success-title">Return received</div>
+    <div class="success-sub" id="success-sub">Logged successfully</div>
+  </div>
+  <div class="success-detail">
+    <div class="sd-row"><span class="sd-label">Order</span><span class="sd-value" id="s-order">–</span></div>
+    <div class="sd-row"><span class="sd-label">Customer</span><span class="sd-value" id="s-customer">–</span></div>
+    <div class="sd-row"><span class="sd-label">Received by</span><span class="sd-value" id="s-by">–</span></div>
+    <div class="sd-row"><span class="sd-label">Time</span><span class="sd-value" id="s-time">–</span></div>
+  </div>
+  <button class="next-btn" onclick="scanAnother()">Scan another return</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Standalone staff handler - works even if main script fails
+function selectStaff(name) {
+  if (!name) return;
+  localStorage.setItem('bbl_staff', name);
+  if (window.__bblShowApp) {
+    window.__bblShowApp(name);
+  } else {
+    location.reload();
+  }
+}
+</script>
+<script>
+(function() {
+
+const SUPABASE_URL = 'https://rousljiuoswvbszgfmys.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdXNsaml1b3N3dmJzemdmbXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTkwMDYsImV4cCI6MjA5MTEzNTAwNn0.pIz0ESqkXP6wqjI4H0sOOR-5diZTSQzSh9bksRLzaI0';
+const ERP_URL = 'https://zatjokylncxbeppwzqxu.supabase.co';
+const ERP_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphdGpva3lsbmN4YmVwcHd6cXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NDYxNDksImV4cCI6MjA5MTMyMjE0OX0.eAC8RFMNnL4R5ziIp_wARoUROLu937yUjOed4HbF4Mw';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const erpDb = createClient(ERP_URL, ERP_ANON_KEY);
+
+let currentStaff = null;
+let currentReturn = null; // { rm, shopifyOrder, matchConfidence, rentals }
+
+// ---- Multi-part products ----
+// Products on this list require staff to confirm the FULL product is present
+// before we fire Supercycle's createReturn (which cancels the rental).
+let multiPartTitles = new Set();
+let pendingCompleteEl = null; // the rental-item div currently in the complete-check modal
+
+async function loadMultiPartProducts() {
+  try {
+    const { data } = await db.from('multipart_products').select('product_title');
+    multiPartTitles = new Set((data || []).map(r => (r.product_title || '').trim().toLowerCase()));
+  } catch(e) {
+    console.warn('Failed to load multi-part products list', e);
+  }
+}
+function isMultiPartTitle(title) {
+  return multiPartTitles.has((title || '').trim().toLowerCase());
+}
+
+function normaliseOrder(val) {
+  if (!val) return '';
+  return String(val).replace(/[^0-9]/g, '').replace(/^0+/, '');
+}
+
+// ---- Supercycle proxy call ----
+async function supercycle(action, payload) {
+  const res = await fetch('/.netlify/functions/supercycle', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, payload })
+  });
+  if (!res.ok) throw new Error('Supercycle call failed: ' + res.status);
+  return res.json();
+}
+
+// ---- Init ----
+const stored = localStorage.getItem('bbl_staff');
+if (stored) { currentStaff = stored; showApp(); }
+
+function selectStaff(name) {
+  currentStaff = name;
+  localStorage.setItem('bbl_staff', name);
+  showApp();
+}
+window.selectStaff = selectStaff;
+
+function showApp() {
+  document.getElementById('main-header').style.display = 'flex';
+  document.getElementById('staff-chip-btn').textContent = currentStaff;
+  showScreen('scan');
+  loadRecent();
+  loadMultiPartProducts();
+}
+window.__bblShowApp = function(name) {
+  currentStaff = name;
+  showApp();
+};
+
+document.getElementById('staff-chip-btn').addEventListener('click', () => {
+  if (confirm('Switch staff member?')) {
+    localStorage.removeItem('bbl_staff');
+    currentStaff = null;
+    document.getElementById('main-header').style.display = 'none';
+    showScreen('staff');
+  }
+});
+
+// ---- Screens ----
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'scan') {
+    setTimeout(focusScannerInput, 100);
+  }
+}
+
+function goBack() {
+  showScreen('scan');
+  document.getElementById('scan-error').classList.remove('visible');
+  document.getElementById('track-input').value = '';
+  document.getElementById('manual-input').value = '';
+  otherOrdersLoaded = false;
+  resetIssuePanel();
+}
+window.goBack = goBack;
+
+// ---- Scanner input ----
+const trackInput = document.getElementById('track-input');
+const manualInput = document.getElementById('manual-input');
+
+// Auto-focus scanner input on scan screen — inputmode=none prevents keyboard
+function focusScannerInput() {
+  trackInput.focus({ preventScroll: true });
+}
+
+// Tap scanner target or the input itself to re-focus
+document.getElementById('scanner-target-el').addEventListener('click', focusScannerInput);
+trackInput.addEventListener('click', focusScannerInput);
+
+// Scanner input handler
+let scanDebounce = null;
+trackInput.addEventListener('input', () => {
+  clearTimeout(scanDebounce);
+  const val = trackInput.value.trim();
+  if (val.length >= 8) {
+    scanDebounce = setTimeout(() => {
+      lookupTracking(val);
+      trackInput.value = '';
+      trackInput.placeholder = 'Waiting for scan...';
+      trackInput.style.color = 'var(--text-3)';
+      focusScannerInput();
+    }, 300);
+  }
+});
+
+trackInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    clearTimeout(scanDebounce);
+    const val = trackInput.value.trim();
+    if (val.length >= 2) {
+      lookupTracking(val);
+      trackInput.value = '';
+      focusScannerInput();
+    }
+  }
+});
+
+// Show scanned value in the input while scanning
+trackInput.addEventListener('input', () => {
+  if (trackInput.value) {
+    trackInput.style.color = 'var(--text)';
+    trackInput.placeholder = '';
+  }
+}, { capture: true });
+
+// Manual input
+manualInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') lookupManual();
+});
+
+function lookupManual() {
+  const val = manualInput.value.trim().toUpperCase();
+  if (!val) return;
+  lookupTracking(val);
+}
+window.lookupManual = lookupManual;
+
+// ---- Lookup ----
+async function lookupTracking(raw) {
+  raw = (raw || '').trim().toUpperCase();
+  if (!raw) return;
+
+  document.getElementById('scan-error').classList.remove('visible');
+  showLoading('Looking up return...');
+
+  try {
+    // Step 1: royal_mail record
+    const { data: rm, error: rmErr } = await db
+      .from('royal_mail')
+      .select('tracking_number, order_number, customer_name, customer_email, customer_postcode, status, received_at, received_by')
+      .eq('tracking_number', raw)
+      .maybeSingle();
+
+    if (rmErr) throw rmErr;
+
+    if (!rm) {
+      hideLoading();
+      document.getElementById('scan-error').textContent = 'Tracking number not found. Please check and try again.';
+      document.getElementById('scan-error').classList.add('visible');
+      return;
+    }
+
+    if (rm.received_at) {
+      hideLoading();
+      const t = new Date(rm.received_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+      document.getElementById('scan-error').textContent = 'Already received — order ' + rm.order_number + ' (' + t + ' by ' + (rm.received_by || 'unknown') + ')';
+      document.getElementById('scan-error').classList.add('visible');
+      return;
+    }
+
+    // Check for existing partial receipt on same order number
+    let existingPartial = null;
+    if (rm.order_number) {
+      const { data: partialData } = await db
+        .from('royal_mail')
+        .select('tracking_number, notes, received_at, received_by')
+        .eq('order_number', rm.order_number)
+        .eq('receipt_status', 'partial')
+        .neq('tracking_number', raw)
+        .maybeSingle();
+      existingPartial = partialData || null;
+    }
+
+    // Steps 2 & 3 in parallel: shopify lookup + order-number-based Supercycle lookup
+    showLoading('Loading order details...');
+    const normRm = normaliseOrder(rm.order_number);
+
+    const [erpResult, scByOrderResult] = await Promise.all([
+      // ERP: try exact order number first
+      erpDb.from('shopify_orders')
+        .select('id, order_number, customer_email, fulfillment_status, tags')
+        .eq('order_number', rm.order_number)
+        .gt('id', 1000000)
+        .maybeSingle(),
+      // Supercycle: search by order name in parallel
+      supercycle('getRentals', { orderName: rm.order_number }).catch(() => null)
+    ]);
+
+    let shopifyOrder = erpResult.data || null;
+    let matchConfidence = shopifyOrder ? 'full' : 'none';
+
+    // If no exact order number match, fall back to email match
+    if (!shopifyOrder && rm.customer_email) {
+      const { data: byEmail } = await erpDb
+        .from('shopify_orders')
+        .select('id, order_number, customer_email, fulfillment_status, tags')
+        .eq('customer_email', rm.customer_email)
+        .gt('id', 1000000)
+        .not('tags', 'ilike', '%Recurring order%')
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (byEmail) { shopifyOrder = byEmail; matchConfidence = 'partial'; }
+    }
+
+    // Get rentals — if we have a numeric Shopify ID now, re-fetch with it for accuracy
+    let rentals = (scByOrderResult && scByOrderResult.data) || [];
+    if (shopifyOrder && shopifyOrder.id && rentals.length === 0) {
+      try {
+        const scData = await supercycle('getRentals', { shopifyOrderId: shopifyOrder.id, orderName: rm.order_number });
+        rentals = scData.data || [];
+      } catch(e) {}
+    }
+
+    currentReturn = { rm, shopifyOrder, matchConfidence, rentals, existingPartial };
+    hideLoading();
+    showConfirm(currentReturn);
+
+  } catch(e) {
+    hideLoading();
+    console.error(e);
+    document.getElementById('scan-error').textContent = 'Something went wrong. Please try again.';
+    document.getElementById('scan-error').classList.add('visible');
+  }
+}
+window.lookupTracking = lookupTracking;
+
+// ---- Confirm screen ----
+function showConfirm({ rm, shopifyOrder, matchConfidence, rentals }) {
+  document.getElementById('confirm-order').textContent = rm.order_number || (shopifyOrder && shopifyOrder.order_name) || '--';
+  document.getElementById('confirm-tracking').textContent = rm.tracking_number;
+  document.getElementById('confirm-customer').textContent = rm.customer_name || (shopifyOrder && shopifyOrder.full_name) || '--';
+  document.getElementById('confirm-postcode').textContent = rm.customer_postcode || (shopifyOrder && shopifyOrder.postcode) || '--';
+
+  document.getElementById('match-warning').style.display = matchConfidence === 'partial' ? 'block' : 'none';
+
+  // Show partial banner if another box was already received
+  const existingPartial = currentReturn.existingPartial;
+  const partialBanner = document.getElementById('partial-banner');
+  if (existingPartial) {
+    document.getElementById('partial-banner-note').textContent = existingPartial.notes || 'No note added';
+    partialBanner.style.display = 'block';
+  } else {
+    partialBanner.style.display = 'none';
+  }
+
+  // Reset partial panel
+  document.getElementById('partial-panel').style.display = 'none';
+  document.getElementById('partial-btn').textContent = 'Mark as partially received';
+  document.getElementById('partial-btn').style.borderColor = '#3b82f6';
+  document.getElementById('partial-btn').style.color = '#1e40af';
+
+  // Check for replacement tag
+  const tags = (shopifyOrder && shopifyOrder.tags) || '';
+  const isReplacement = tags.toLowerCase().includes('replacement');
+  document.getElementById('replacement-warning').style.display = isReplacement ? 'block' : 'none';
+  document.getElementById('manual-check-btn').style.display = 'block';
+  document.getElementById('manual-check-added').style.display = 'none';
+
+  // Build rental checklist
+  const checklist = document.getElementById('rental-checklist');
+  checklist.innerHTML = '';
+
+  if (rentals.length === 0) {
+    checklist.innerHTML = '<div class="no-rentals">No active rentals found in Supercycle for this order. Please check manually before confirming.</div>';
+  } else {
+    rentals.forEach(rental => {
+      const alreadyReceived = rental.receivalStatus === 'complete';
+      const title = (rental.item && rental.item.productTitle) || rental.shopifyOrderName || 'Item';
+      const variant = (rental.item && rental.item.variantTitle) ? rental.item.variantTitle : '';
+      const methodType = rental.methodType || '';
+      const multiPart = isMultiPartTitle(title);
+
+      const div = document.createElement('div');
+      div.className = 'rental-item' + (alreadyReceived ? ' already-received' : '');
+      div.dataset.rentalId = rental.id;
+      div.dataset.returnOrderId = rental.returnOrderId || '';
+      div.dataset.checked = 'false';
+      div.dataset.incomplete = 'false';
+      div.dataset.multipart = multiPart ? 'true' : 'false';
+      div.dataset.title = title;
+      div.dataset.variant = variant;
+
+      div.innerHTML = `
+        <div class="rental-checkbox">${alreadyReceived ? '\u2713' : ''}</div>
+        <div class="rental-item-info">
+          <div class="rental-item-title">${title}</div>
+          ${variant ? '<div class="rental-item-sub">' + variant + '</div>' : ''}
+          ${multiPart && !alreadyReceived ? '<div class="multipart-tag">&#9888; Sent in multiple parts — confirm full item present</div>' : ''}
+        </div>
+        <div class="rental-item-badge">${alreadyReceived ? 'Received' : methodType}</div>
+      `;
+
+      if (!alreadyReceived) {
+        div.addEventListener('click', () => toggleRentalItem(div));
+      }
+
+      checklist.appendChild(div);
+    });
+  }
+
+  document.getElementById('confirm-error').classList.remove('visible');
+  showScreen('confirm');
+}
+
+function toggleRentalItem(el) {
+  const checked = el.dataset.checked === 'true';
+
+  // Unchecking (or clearing an incomplete flag) always just resets the item
+  if (checked) {
+    el.dataset.checked = 'false';
+    el.dataset.incomplete = 'false';
+    delete el.dataset.missingNotes;
+    el.classList.remove('checked', 'incomplete-flag');
+    el.querySelector('.rental-checkbox').textContent = '';
+    return;
+  }
+
+  // Checking a multi-part item routes through the complete-check modal first
+  if (el.dataset.multipart === 'true') {
+    openCompleteModal(el);
+    return;
+  }
+
+  el.dataset.checked = 'true';
+  el.classList.add('checked');
+  el.querySelector('.rental-checkbox').textContent = '\u2713';
+}
+
+// ---- Complete-check modal ----
+function openCompleteModal(el) {
+  pendingCompleteEl = el;
+  document.getElementById('complete-modal-title').textContent = 'Is this complete?';
+  document.getElementById('complete-modal-sub').textContent =
+    (el.dataset.title || 'This item') + ' is often sent in multiple parts. Confirm the full item is present before we cancel it in Supercycle.';
+  document.getElementById('complete-modal-missing').style.display = 'none';
+  document.getElementById('complete-modal-notes').value = '';
+  document.getElementById('complete-modal').classList.add('visible');
+}
+window.openCompleteModal = openCompleteModal;
+
+function resolveCompleteModal(isComplete) {
+  if (!pendingCompleteEl) return;
+  if (isComplete) {
+    const el = pendingCompleteEl;
+    el.dataset.checked = 'true';
+    el.dataset.incomplete = 'false';
+    el.classList.add('checked');
+    el.querySelector('.rental-checkbox').textContent = '\u2713';
+    closeCompleteModal();
+  } else {
+    document.getElementById('complete-modal-missing').style.display = 'block';
+  }
+}
+window.resolveCompleteModal = resolveCompleteModal;
+
+function confirmIncompleteItem() {
+  if (!pendingCompleteEl) return;
+  const notes = document.getElementById('complete-modal-notes').value.trim();
+  if (!notes) {
+    alert('Please add a quick note on what\'s missing.');
+    return;
+  }
+  const el = pendingCompleteEl;
+  el.dataset.checked = 'true';
+  el.dataset.incomplete = 'true';
+  el.dataset.missingNotes = notes;
+  el.classList.add('checked', 'incomplete-flag');
+  el.querySelector('.rental-checkbox').textContent = '\u2713';
+  el.querySelector('.rental-item-badge').textContent = 'Incomplete — flagged';
+  closeCompleteModal();
+}
+window.confirmIncompleteItem = confirmIncompleteItem;
+
+function closeCompleteModal() {
+  pendingCompleteEl = null;
+  document.getElementById('complete-modal').classList.remove('visible');
+}
+window.closeCompleteModal = closeCompleteModal;
+
+// ---- Other orders ----
+let otherOrdersLoaded = false;
+
+async function toggleOtherOrders() {
+  const panel = document.getElementById('other-orders-panel');
+  const isVisible = panel.classList.contains('visible');
+  if (isVisible) {
+    panel.classList.remove('visible');
+    return;
+  }
+  panel.classList.add('visible');
+  if (otherOrdersLoaded) return;
+
+  const email = currentReturn.rm.customer_email;
+  if (!email) {
+    document.getElementById('other-orders-loading').textContent = 'No email found for this customer.';
+    return;
+  }
+
+  try {
+    const { data: orders } = await erpDb
+      .from('shopify_orders')
+      .select('id, order_number, tags, raw')
+      .eq('customer_email', email)
+      .gt('id', 1000000)
+      .order('id', { ascending: false });
+
+    const filtered = (orders || []).filter(o => {
+      const tags = o.tags || '';
+      return !tags.includes('Recurring order');
+    });
+
+    document.getElementById('other-orders-loading').style.display = 'none';
+    const list = document.getElementById('other-orders-list');
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="other-orders-loading">No other orders found.</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    filtered.forEach(o => {
+      let itemsText = '';
+      try {
+        const raw = typeof o.raw === 'string' ? JSON.parse(o.raw) : o.raw;
+        if (raw && raw.line_items) {
+          itemsText = raw.line_items.map(i => i.title || i.name).filter(Boolean).join(', ');
+        }
+      } catch(e) {}
+      const row = document.createElement('div');
+      row.className = 'other-order-row';
+      row.innerHTML = '<div><div class="other-order-name">' + o.order_number + '</div>' +
+        (itemsText ? '<div class="other-order-items">' + itemsText + '</div>' : '') +
+        '</div><div class="other-order-select">Select &#x203A;</div>';
+      row.addEventListener('click', () => selectOtherOrder(o.id, o.order_number));
+      list.appendChild(row);
+    });
+
+    otherOrdersLoaded = true;
+  } catch(e) {
+    console.error(e);
+    document.getElementById('other-orders-loading').textContent = 'Failed to load other orders.';
+  }
+}
+window.toggleOtherOrders = toggleOtherOrders;
+
+async function selectOtherOrder(shopifyId, orderNumber) {
+  // Update currentReturn with the selected order
+  const { data: order } = await erpDb
+    .from('shopify_orders')
+    .select('id, order_number, customer_email, tags, raw')
+    .eq('id', parseInt(shopifyId))
+    .maybeSingle();
+
+  if (!order) return;
+
+  currentReturn.shopifyOrder = order;
+  currentReturn.matchConfidence = 'manual';
+
+  // Update header
+  document.getElementById('confirm-order').textContent = orderNumber;
+
+  // Update items from Supercycle for new order
+  document.getElementById('rental-checklist').innerHTML = '<div class="other-orders-loading">Loading items...</div>';
+  document.getElementById('other-orders-panel').classList.remove('visible');
+  document.getElementById('other-orders-btn').textContent = 'Order changed to ' + orderNumber + ' — Items don\'t match?';
+
+  showLoading('Loading items from Supercycle...');
+  try {
+    const scData = await supercycle('getRentals', { shopifyOrderId: parseInt(shopifyId), orderName: orderNumber });
+    currentReturn.rentals = scData.data || [];
+  } catch(e) {
+    currentReturn.rentals = [];
+  }
+  hideLoading();
+
+  // Rebuild checklist
+  const checklist = document.getElementById('rental-checklist');
+  checklist.innerHTML = '';
+  if (currentReturn.rentals.length === 0) {
+    checklist.innerHTML = '<div class="no-rentals">No active rentals found in Supercycle for this order.</div>';
+  } else {
+    currentReturn.rentals.forEach(rental => {
+      const alreadyReceived = rental.receivalStatus === 'complete';
+      const title = (rental.item && rental.item.productTitle) || rental.shopifyOrderName || 'Item';
+      const variant = (rental.item && rental.item.variantTitle) ? rental.item.variantTitle : '';
+      const methodType = rental.methodType || '';
+      const multiPart = isMultiPartTitle(title);
+      const div = document.createElement('div');
+      div.className = 'rental-item' + (alreadyReceived ? ' already-received' : '');
+      div.dataset.rentalId = rental.id;
+      div.dataset.returnOrderId = rental.returnOrderId || '';
+      div.dataset.checked = 'false';
+      div.dataset.incomplete = 'false';
+      div.dataset.multipart = multiPart ? 'true' : 'false';
+      div.dataset.title = title;
+      div.dataset.variant = variant;
+      div.innerHTML = `<div class="rental-checkbox">${alreadyReceived ? '\u2713' : ''}</div>
+        <div class="rental-item-info">
+          <div class="rental-item-title">${title}</div>
+          ${variant ? '<div class="rental-item-sub">' + variant + '</div>' : ''}
+          ${multiPart && !alreadyReceived ? '<div class="multipart-tag">&#9888; Sent in multiple parts — confirm full item present</div>' : ''}
+        </div>
+        <div class="rental-item-badge">${alreadyReceived ? 'Received' : methodType}</div>`;
+      if (!alreadyReceived) div.addEventListener('click', () => toggleRentalItem(div));
+      checklist.appendChild(div);
+    });
+  }
+}
+window.selectOtherOrder = selectOtherOrder;
+
+// ---- Issue logging ----
+let issuePhotoFile = null;
+
+function toggleIssuePanel() {
+  const panel = document.getElementById('issue-panel');
+  const btn = document.getElementById('issue-toggle-btn');
+  const isHidden = panel.classList.contains('hidden');
+  panel.classList.toggle('hidden', !isHidden);
+  btn.style.color = isHidden ? 'var(--red)' : 'var(--text-2)';
+  btn.style.borderColor = isHidden ? 'var(--red)' : 'var(--border)';
+}
+window.toggleIssuePanel = toggleIssuePanel;
+
+document.getElementById('issue-photo-input').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  issuePhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const preview = document.getElementById('issue-photo-preview');
+    preview.src = e.target.result;
+    preview.classList.add('visible');
+    const btn = document.getElementById('issue-photo-btn');
+    btn.classList.add('has-photo');
+    btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Photo added — tap to replace';
+  };
+  reader.readAsDataURL(file);
+});
+
+async function uploadIssuePhoto(file) {
+  const ext = file.name.split('.').pop() || 'jpg';
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { data, error } = await db.storage.from('issue-photos').upload(filename, file, {
+    contentType: file.type,
+    upsert: false
+  });
+  if (error) throw error;
+  const { data: urlData } = db.storage.from('issue-photos').getPublicUrl(filename);
+  return urlData.publicUrl;
+}
+
+async function logIssue(rm, shopifyOrder) {
+  const issueType = document.getElementById('issue-type').value;
+  const notes = document.getElementById('issue-notes').value.trim();
+  if (!issueType) return; // no issue type selected, skip
+
+  let photoUrl = null;
+  if (issuePhotoFile) {
+    try { photoUrl = await uploadIssuePhoto(issuePhotoFile); } catch(e) { console.warn('Photo upload failed:', e); }
+  }
+
+  await db.from('issues').insert({
+    logged_at_stage: 'return',
+    issue_type: issueType,
+    notes: notes || null,
+    photo_url: photoUrl,
+    tracking_number: rm.tracking_number,
+    order_number: rm.order_number,
+    customer_name: rm.customer_name,
+    customer_email: rm.customer_email,
+    logged_by: currentStaff
+  });
+}
+
+function resetIssuePanel() {
+  issuePhotoFile = null;
+  document.getElementById('issue-type').value = '';
+  document.getElementById('issue-notes').value = '';
+  document.getElementById('issue-photo-preview').src = '';
+  document.getElementById('issue-photo-preview').classList.remove('visible');
+  document.getElementById('issue-photo-btn').classList.remove('has-photo');
+  document.getElementById('issue-photo-btn').innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Add photo (optional)';
+  document.getElementById('issue-panel').classList.add('hidden');
+  document.getElementById('issue-toggle-btn').style.color = 'var(--text-2)';
+  document.getElementById('issue-toggle-btn').style.borderColor = 'var(--border)';
+}
+
+// ---- Partial receipt ----
+function togglePartialPanel() {
+  const panel = document.getElementById('partial-panel');
+  const isHidden = panel.style.display === 'none';
+  panel.style.display = isHidden ? 'block' : 'none';
+}
+window.togglePartialPanel = togglePartialPanel;
+
+async function confirmPartial() {
+  if (!currentReturn || !currentStaff) return;
+  const notes = document.getElementById('partial-notes').value.trim();
+  if (!notes) {
+    alert('Please add a note describing which part was received.');
+    return;
+  }
+
+  const btn = document.querySelector('#partial-panel .scan-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  const now = new Date().toISOString();
+  await db.from('royal_mail').update({
+    received_at: now,
+    received_by: currentStaff,
+    receipt_status: 'partial',
+    notes: notes,
+    status: 'partial'
+  }).eq('tracking_number', currentReturn.rm.tracking_number);
+
+  btn.disabled = false;
+  btn.textContent = 'Saved!';
+  setTimeout(() => {
+    document.getElementById('partial-panel').style.display = 'none';
+    document.getElementById('partial-btn').textContent = 'Partially received — logged';
+    document.getElementById('partial-btn').style.borderColor = 'var(--green)';
+    document.getElementById('partial-btn').style.color = 'var(--green)';
+    loadRecent();
+  }, 800);
+}
+window.confirmPartial = confirmPartial;
+
+// ---- Manual check flag ----
+async function addToManualChecks() {
+  if (!currentReturn) return;
+  await db.from('royal_mail')
+    .update({ manual_check: true })
+    .eq('tracking_number', currentReturn.rm.tracking_number);
+  // Update both the replacement banner button and the always-visible button
+  const btn1 = document.getElementById('manual-check-btn');
+  const added1 = document.getElementById('manual-check-added');
+  const btn2 = document.getElementById('manual-check-always-btn');
+  const added2 = document.getElementById('manual-check-added-always');
+  if (btn1) btn1.style.display = 'none';
+  if (added1) added1.style.display = 'block';
+  if (btn2) btn2.style.display = 'none';
+  if (added2) added2.style.display = 'block';
+}
+window.addToManualChecks = addToManualChecks;
+
+// ---- Confirm receipt ----
+async function confirmReceipt() {
+  if (!currentReturn || !currentStaff) return;
+
+  const allChecked = Array.from(document.querySelectorAll('.rental-item[data-checked="true"]'));
+  if (allChecked.length === 0) {
+    document.getElementById('confirm-error').textContent = 'Please tick at least one item to confirm receipt.';
+    document.getElementById('confirm-error').classList.add('visible');
+    return;
+  }
+
+  // Items confirmed as fully present get cancelled in Supercycle as normal.
+  // Items flagged incomplete are NOT touched in Supercycle — they go to the
+  // incomplete_receipts sheet for manual review/cancellation instead.
+  const completeItems = allChecked.filter(item => item.dataset.incomplete !== 'true');
+  const incompleteItems = allChecked.filter(item => item.dataset.incomplete === 'true');
+
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Logging...';
+  document.getElementById('confirm-error').classList.remove('visible');
+
+  const now = new Date().toISOString();
+  const errors = [];
+
+  // Fire Supercycle only for items confirmed complete
+  for (const item of completeItems) {
+    const rentalId = parseInt(item.dataset.rentalId);
+    const existingReturnOrderId = item.dataset.returnOrderId ? parseInt(item.dataset.returnOrderId) : null;
+    try {
+      // Always use createReturn — the function handles existing returns too
+      await supercycle('createReturn', { rentalId });
+    } catch(e) {
+      console.error('Supercycle error for rental', rentalId, e);
+      errors.push(rentalId);
+    }
+  }
+
+  // Log incomplete items to the manual-review sheet instead of cancelling
+  if (incompleteItems.length > 0) {
+    const rows = incompleteItems.map(item => ({
+      tracking_number: currentReturn.rm.tracking_number,
+      order_number: currentReturn.rm.order_number,
+      rental_id: parseInt(item.dataset.rentalId),
+      product_title: item.dataset.title || '',
+      variant_title: item.dataset.variant || '',
+      missing_notes: item.dataset.missingNotes || '',
+      flagged_by: currentStaff,
+      flagged_at: now
+    }));
+    try { await db.from('incomplete_receipts').insert(rows); }
+    catch(e) { console.error('Failed to log incomplete receipt(s)', e); }
+  }
+
+  // Write to Supabase regardless (Supercycle errors are non-blocking; the parcel physically arrived)
+  try {
+    await db.from('royal_mail').update({
+      received_at: now,
+      received_by: currentStaff,
+      status: 'received'
+    }).eq('tracking_number', currentReturn.rm.tracking_number);
+  } catch(e) {
+    console.error('Supabase write error', e);
+  }
+
+  // Log issue if one was entered
+  const issueType = document.getElementById('issue-type').value;
+  if (issueType) {
+    try { await logIssue(currentReturn.rm, currentReturn.shopifyOrder); }
+    catch(e) { console.warn('Issue log failed:', e); }
+  }
+
+  const rm = currentReturn.rm;
+  const order = currentReturn.shopifyOrder;
+  const timeStr = new Date(now).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  document.getElementById('s-order').textContent = rm.order_number || (order && order.order_name) || '--';
+  document.getElementById('s-customer').textContent = rm.customer_name || (order && order.full_name) || '--';
+  document.getElementById('s-by').textContent = currentStaff;
+  document.getElementById('s-time').textContent = timeStr;
+
+  let subText = '';
+  if (completeItems.length > 0) {
+    subText += completeItems.length + ' item' + (completeItems.length > 1 ? 's' : '') + ' marked received';
+  }
+  if (incompleteItems.length > 0) {
+    subText += (subText ? ' · ' : '') + incompleteItems.length + ' flagged incomplete — sent for manual review, not cancelled';
+  }
+  document.getElementById('success-sub').textContent = subText;
+
+  if (errors.length > 0) {
+    document.getElementById('success-sub').textContent += ' (Supercycle sync failed for ' + errors.length + ' item — please update manually)';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Confirm receipt';
+  showScreen('success');
+  loadRecent();
+}
+window.confirmReceipt = confirmReceipt;
+
+function scanAnother() {
+  currentReturn = null;
+  otherOrdersLoaded = false;
+  trackInput.value = '';
+  document.getElementById('manual-input').value = '';
+  resetIssuePanel();
+  showScreen('scan');
+}
+window.scanAnother = scanAnother;
+
+// ---- Tabs ----
+let currentTab = 'log';
+function switchTab(tab) {
+  currentTab = tab;
+  ['log','history','manual','incomplete'].forEach(t => {
+    document.getElementById('tab-content-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'history') loadHistory();
+  if (tab === 'manual') loadManualChecks();
+  if (tab === 'incomplete') loadIncompleteReceipts();
+}
+window.switchTab = switchTab;
+
+// ---- Recent receipts ----
+let allTodayReceipts = [];
+
+async function loadRecent() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const { data } = await db
+    .from('royal_mail')
+    .select('tracking_number, order_number, customer_name, received_at, received_by, notes, manual_check')
+    .gte('received_at', today.toISOString())
+    .not('received_at', 'is', null)
+    .order('received_at', { ascending: false })
+    .limit(50);
+
+  allTodayReceipts = data || [];
+  filterToday();
+  updateManualBadge();
+  updateIncompleteBadge();
+}
+
+function filterToday() {
+  const q = (document.getElementById('history-search-today').value || '').toLowerCase();
+  const filtered = q ? allTodayReceipts.filter(r =>
+    (r.order_number||'').toLowerCase().includes(q) ||
+    (r.customer_name||'').toLowerCase().includes(q) ||
+    (r.tracking_number||'').toLowerCase().includes(q)
+  ) : allTodayReceipts;
+
+  const el = document.getElementById('recent-list');
+  if (!filtered.length) { el.innerHTML = '<div class="empty-state">No receipts found</div>'; return; }
+  el.innerHTML = filtered.map(r => `
+    <div class="receipt-row" onclick="openReceiptDetail('${r.tracking_number}')" style="cursor:pointer">
+      <div class="receipt-row-left">
+        <div class="receipt-order">${r.order_number || '--'}${r.manual_check ? ' <span style="color:var(--amber);font-size:11px;font-weight:600">MANUAL</span>' : ''}</div>
+        <div class="receipt-customer">${r.customer_name || '--'}</div>
+        <div class="receipt-items">${r.tracking_number}</div>
+        ${r.notes ? '<div class="receipt-items" style="color:var(--text-2);font-style:italic">' + r.notes.substring(0,40) + (r.notes.length>40?'...':'') + '</div>' : ''}
+      </div>
+      <div class="receipt-meta">
+        <div class="receipt-time">${new Date(r.received_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
+        <span class="receipt-by">${r.received_by}</span>
+      </div>
+    </div>
+  `).join('');
+}
+window.filterToday = filterToday;
+
+function updateManualBadge() {
+  const count = allTodayReceipts.filter(r => r.manual_check).length;
+  const badge = document.getElementById('manual-count-badge');
+  if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+  else { badge.style.display = 'none'; }
+}
+
+async function updateIncompleteBadge() {
+  const badge = document.getElementById('incomplete-count-badge');
+  try {
+    const { count } = await db
+      .from('incomplete_receipts')
+      .select('id', { count: 'exact', head: true })
+      .eq('resolved', false);
+    if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+    else { badge.style.display = 'none'; }
+  } catch(e) {
+    console.warn('Failed to load incomplete receipts count', e);
+  }
+}
+
+// ---- Receipt detail ----
+async function openReceiptDetail(trackingNumber) {
+  showScreen('receipt');
+  document.getElementById('receipt-detail-content').innerHTML = '<div class="spinner" style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin 0.7s linear infinite;margin:48px auto;"></div>';
+
+  const { data: rm } = await db
+    .from('royal_mail')
+    .select('*')
+    .eq('tracking_number', trackingNumber)
+    .maybeSingle();
+
+  if (!rm) { document.getElementById('receipt-detail-content').innerHTML = '<div class="empty-state">Record not found</div>'; return; }
+
+  // Try to get rentals from Supercycle for items
+  let rentals = [];
+  if (rm.order_number) {
+    try {
+      const scData = await supercycle('getRentals', { orderName: rm.order_number });
+      rentals = scData.data || [];
+    } catch(e) {}
+  }
+
+  const receivedTime = rm.received_at ? new Date(rm.received_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '--';
+
+  document.getElementById('receipt-detail-content').innerHTML = `
+    <div class="confirm-card" style="margin-bottom:16px">
+      <div class="confirm-card-header">
+        <div class="label">Return received</div>
+        <h2>${rm.order_number || '--'}</h2>
+        <div class="sub">${rm.tracking_number}</div>
+      </div>
+      <div class="confirm-field">
+        <div class="field-label">Customer</div>
+        <div class="field-value">${rm.customer_name || '--'}</div>
+      </div>
+      <div class="confirm-field">
+        <div class="field-label">Postcode</div>
+        <div class="field-value mono">${rm.customer_postcode || '--'}</div>
+      </div>
+      <div class="confirm-field">
+        <div class="field-label">Received</div>
+        <div class="field-value">${receivedTime} by ${rm.received_by || '--'}</div>
+      </div>
+      ${rentals.length > 0 ? `
+      <div class="confirm-field">
+        <div class="field-label">Items</div>
+        <div class="items-list" style="margin-top:4px">
+          ${rentals.map(r => '<div class="item-pill">' + ((r.item && r.item.productTitle) || 'Item') + (r.item && r.item.variantTitle ? ' — ' + r.item.variantTitle : '') + '</div>').join('')}
+        </div>
+      </div>` : ''}
+    </div>
+
+    ${rm.manual_check ? `
+    <div style="background:var(--amber-light);border:1px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;margin-bottom:16px;">
+      This return is in Manual Checks — please verify the correct rental was marked as received.
+    </div>` : ''}
+
+    ${!rm.received_at ? `
+    <button class="confirm-btn" onclick="markReceivedFromDetail('${rm.tracking_number}')" id="mark-received-detail-btn">
+      Mark as received
+    </button>
+    <div id="mark-received-done" style="display:none;text-align:center;font-size:14px;color:var(--green);font-weight:600;margin-bottom:12px;">Marked as received</div>
+    ` : ''}
+
+    ${rm.manual_check ? `
+    <button class="other-orders-btn" onclick="resolveManualCheck('${rm.tracking_number}')" id="resolve-manual-btn" style="border-color:var(--green);color:var(--green);margin-top:8px;">
+      Remove from Manual Checks
+    </button>
+    <div id="resolve-manual-done" style="display:none;text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-top:6px;">Removed from Manual Checks</div>
+    ` : ''}
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;">
+      <div class="field-label" style="margin-bottom:8px">Notes</div>
+      <textarea id="receipt-notes" style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;min-height:80px;color:var(--text);background:var(--surface);" placeholder="Add notes about this return...">${rm.notes || ''}</textarea>
+      <button class="scan-btn" onclick="saveReceiptNotes('${rm.tracking_number}')" style="margin-top:10px;padding:12px;">Save notes</button>
+      <div id="notes-saved" style="display:none;font-size:13px;color:var(--green);margin-top:8px;font-weight:600;">Notes saved</div>
+    </div>
+  `;
+}
+window.openReceiptDetail = openReceiptDetail;
+
+async function markReceivedFromDetail(trackingNumber) {
+  if (!currentStaff) { alert('Please select your name first'); return; }
+  const btn = document.getElementById('mark-received-detail-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Marking...'; }
+  const now = new Date().toISOString();
+
+  // Get the order number to look up Supercycle rentals
+  const { data: rm } = await db.from('royal_mail').select('order_number').eq('tracking_number', trackingNumber).maybeSingle();
+
+  // Fire Supercycle for each active rental on this order — but skip
+  // multi-part products, since there's no checklist here to confirm the
+  // full item is present. Those get flagged to the incomplete sheet instead.
+  if (rm && rm.order_number) {
+    try {
+      const scData = await supercycle('getRentals', { orderName: rm.order_number });
+      const rentals = (scData.data || []).filter(r => r.receivalStatus !== 'complete');
+      const incompleteRows = [];
+      for (const rental of rentals) {
+        const title = (rental.item && rental.item.productTitle) || rental.shopifyOrderName || 'Item';
+        if (isMultiPartTitle(title)) {
+          incompleteRows.push({
+            tracking_number: trackingNumber,
+            order_number: rm.order_number,
+            rental_id: rental.id,
+            product_title: title,
+            variant_title: (rental.item && rental.item.variantTitle) || '',
+            missing_notes: 'Marked as received via receipt detail screen — please verify all parts are present before cancelling in Supercycle.',
+            flagged_by: currentStaff,
+            flagged_at: now
+          });
+        } else {
+          try { await supercycle('createReturn', { rentalId: rental.id }); } catch(e) { console.warn('Supercycle error for rental', rental.id, e); }
+        }
+      }
+      if (incompleteRows.length > 0) {
+        try { await db.from('incomplete_receipts').insert(incompleteRows); }
+        catch(e) { console.error('Failed to log incomplete receipt(s)', e); }
+      }
+    } catch(e) { console.warn('Supercycle lookup failed', e); }
+  }
+
+  await db.from('royal_mail').update({
+    received_at: now,
+    received_by: currentStaff,
+    status: 'received',
+    receipt_status: 'received'
+  }).eq('tracking_number', trackingNumber);
+
+  if (btn) btn.style.display = 'none';
+  const done = document.getElementById('mark-received-done');
+  if (done) done.style.display = 'block';
+  loadRecent();
+}
+window.markReceivedFromDetail = markReceivedFromDetail;
+
+async function resolveManualCheck(trackingNumber) {
+  const btn = document.getElementById('resolve-manual-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Removing...'; }
+  await db.from('royal_mail').update({ manual_check: false }).eq('tracking_number', trackingNumber);
+  if (btn) btn.style.display = 'none';
+  const done = document.getElementById('resolve-manual-done');
+  if (done) done.style.display = 'block';
+  loadManualChecks();
+  updateManualBadge();
+}
+window.resolveManualCheck = resolveManualCheck;
+
+async function saveReceiptNotes(trackingNumber) {
+  const notes = document.getElementById('receipt-notes').value.trim();
+  await db.from('royal_mail').update({ notes }).eq('tracking_number', trackingNumber);
+  document.getElementById('notes-saved').style.display = 'block';
+  setTimeout(() => { const el = document.getElementById('notes-saved'); if(el) el.style.display = 'none'; }, 2000);
+  // Update local cache
+  const r = allTodayReceipts.find(r => r.tracking_number === trackingNumber);
+  if (r) r.notes = notes;
+}
+window.saveReceiptNotes = saveReceiptNotes;
+
+function goBackFromReceipt() {
+  showScreen('scan');
+  loadRecent();
+}
+window.goBackFromReceipt = goBackFromReceipt;
+
+// ---- History tab ----
+async function loadHistory() {
+  const q = (document.getElementById('hist-search').value || '').trim().toLowerCase();
+  const date = document.getElementById('hist-date').value;
+  const day = document.getElementById('hist-day') ? document.getElementById('hist-day').value : '';
+  const month = document.getElementById('hist-month') ? document.getElementById('hist-month').value : '';
+  const year = document.getElementById('hist-year') ? document.getElementById('hist-year').value : '';
+  const hasDate = day && month && year;
+  if (!q && !hasDate) { document.getElementById('history-list').innerHTML = '<div class="empty-state">Enter a search term or date above</div>'; return; }
+
+  let query = db.from('royal_mail').select('tracking_number, order_number, customer_name, customer_email, received_at, received_by, notes, manual_check').not('received_at', 'is', null).order('received_at', { ascending: false }).limit(100);
+
+  if (day && month && year) {
+    const start = new Date(`${year}-${month}-${day}T00:00:00`);
+    const end = new Date(`${year}-${month}-${day}T23:59:59`);
+    query = query.gte('received_at', start.toISOString()).lte('received_at', end.toISOString());
+  }
+
+  const { data } = await query;
+  let results = data || [];
+
+  if (q) {
+    results = results.filter(r =>
+      (r.order_number||'').toLowerCase().includes(q) ||
+      (r.customer_name||'').toLowerCase().includes(q) ||
+      (r.customer_email||'').toLowerCase().includes(q) ||
+      (r.tracking_number||'').toLowerCase().includes(q)
+    );
+  }
+
+  const el = document.getElementById('history-list');
+  if (!results.length) { el.innerHTML = '<div class="empty-state">No results found</div>'; return; }
+  el.innerHTML = results.map(r => `
+    <div class="receipt-row" onclick="openReceiptDetail('${r.tracking_number}')" style="cursor:pointer">
+      <div class="receipt-row-left">
+        <div class="receipt-order">${r.order_number || '--'}${r.manual_check ? ' <span style="color:var(--amber);font-size:11px;font-weight:600">MANUAL</span>' : ''}</div>
+        <div class="receipt-customer">${r.customer_name || '--'}</div>
+        <div class="receipt-items">${r.tracking_number}</div>
+        ${r.notes ? '<div class="receipt-items" style="color:var(--text-2);font-style:italic">' + r.notes.substring(0,40) + (r.notes.length>40?'...':'') + '</div>' : ''}
+      </div>
+      <div class="receipt-meta">
+        <div class="receipt-time">${new Date(r.received_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</div>
+        <span class="receipt-by">${r.received_by}</span>
+      </div>
+    </div>
+  `).join('');
+}
+window.loadHistory = loadHistory;
+
+// ---- Manual checks tab ----
+async function loadManualChecks() {
+  const { data } = await db
+    .from('royal_mail')
+    .select('tracking_number, order_number, customer_name, received_at, received_by, notes')
+    .eq('manual_check', true)
+    .order('received_at', { ascending: false, nullsFirst: false });
+
+  const el = document.getElementById('manual-list');
+  if (!data || !data.length) { el.innerHTML = '<div class="empty-state">No items in manual checks</div>'; return; }
+  el.innerHTML = data.map(r => `
+    <div class="receipt-row" onclick="openReceiptDetail('${r.tracking_number}')" style="cursor:pointer">
+      <div class="receipt-row-left">
+        <div class="receipt-order">${r.order_number || '--'}</div>
+        <div class="receipt-customer">${r.customer_name || '--'}</div>
+        <div class="receipt-items">${r.tracking_number}</div>
+        ${r.notes ? '<div class="receipt-items" style="color:var(--text-2);font-style:italic">' + r.notes.substring(0,40) + (r.notes.length>40?'...':'') + '</div>' : ''}
+      </div>
+      <div class="receipt-meta">
+        <div class="receipt-time">${r.received_at ? new Date(r.received_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : 'Not yet received'}</div>
+        ${r.received_by ? '<span class="receipt-by">' + r.received_by + '</span>' : '<span class="receipt-by" style="background:var(--amber-light);color:var(--amber);border-color:#fcd34d;">Pending</span>'}
+      </div>
+    </div>
+  `).join('');
+}
+window.loadManualChecks = loadManualChecks;
+
+// ---- Incomplete receipts tab ----
+async function loadIncompleteReceipts() {
+  const { data } = await db
+    .from('incomplete_receipts')
+    .select('id, tracking_number, order_number, product_title, variant_title, missing_notes, flagged_by, flagged_at')
+    .eq('resolved', false)
+    .order('flagged_at', { ascending: false });
+
+  const el = document.getElementById('incomplete-list');
+  if (!data || !data.length) { el.innerHTML = '<div class="empty-state">No incomplete returns flagged</div>'; return; }
+  el.innerHTML = data.map(r => `
+    <div class="receipt-row" style="cursor:default">
+      <div class="receipt-row-left">
+        <div class="receipt-order">${r.order_number || '--'}</div>
+        <div class="receipt-customer">${r.product_title || 'Item'}${r.variant_title ? ' — ' + r.variant_title : ''}</div>
+        <div class="receipt-items">${r.tracking_number}</div>
+        ${r.missing_notes ? '<div class="receipt-items" style="color:#92400e;font-style:italic">' + r.missing_notes.substring(0,60) + (r.missing_notes.length>60?'...':'') + '</div>' : ''}
+      </div>
+      <div class="receipt-meta" style="align-items:flex-end;gap:6px;">
+        <div class="receipt-time">${r.flagged_at ? new Date(r.flagged_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '--'}</div>
+        <span class="receipt-by">${r.flagged_by || '--'}</span>
+        <button class="other-orders-btn" style="margin:4px 0 0;padding:8px 10px;font-size:12px;border-color:var(--green);color:var(--green);" onclick="resolveIncompleteReceipt(${r.id})">Resolved — cancelled in Supercycle</button>
+      </div>
+    </div>
+  `).join('');
+}
+window.loadIncompleteReceipts = loadIncompleteReceipts;
+
+async function resolveIncompleteReceipt(id) {
+  if (!currentStaff) { alert('Please select your name first'); return; }
+  await db.from('incomplete_receipts').update({
+    resolved: true,
+    resolved_by: currentStaff,
+    resolved_at: new Date().toISOString()
+  }).eq('id', id);
+  loadIncompleteReceipts();
+  updateIncompleteBadge();
+}
+window.resolveIncompleteReceipt = resolveIncompleteReceipt;
+
+// ---- Loading ----
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text || 'Loading...';
+  document.getElementById('loading').classList.add('visible');
+}
+function hideLoading() {
+  document.getElementById('loading').classList.remove('visible');
+}
+
+})();
+</script>
+</body>
+</html>
