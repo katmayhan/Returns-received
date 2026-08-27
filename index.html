@@ -8,7 +8,6 @@
 <title>Baboodle · Returns</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
-
   :root {
     --red: #dc2626;
     --red-light: #fef2f2;
@@ -26,9 +25,7 @@
     --radius: 12px;
     --radius-sm: 8px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--bg);
@@ -36,7 +33,6 @@
     min-height: 100dvh;
     overscroll-behavior: none;
   }
-
   /* ── Header ── */
   .header {
     background: var(--surface);
@@ -67,11 +63,9 @@
     color: var(--text-2);
   }
   .staff-chip:active { background: var(--border); }
-
   /* ── Screen system ── */
   .screen { display: none; padding: 16px; }
   .screen.active { display: block; }
-
   /* ── Staff picker ── */
   .staff-screen {
     position: fixed;
@@ -118,7 +112,6 @@
     color: var(--text);
   }
   .staff-btn:active { background: var(--red-light); border-color: var(--red); color: var(--red); transform: scale(0.97); }
-
   /* ── Scan screen ── */
   .scan-card {
     background: var(--surface);
@@ -134,7 +127,6 @@
   .scan-card-header h2 { font-size: 17px; font-weight: 700; margin-bottom: 2px; }
   .scan-card-header p { font-size: 13px; color: var(--text-2); }
   .scan-card-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-
   .scanner-target {
     background: var(--bg);
     border: 2px dashed var(--border);
@@ -154,7 +146,6 @@
   }
   .scanner-label { font-size: 16px; font-weight: 700; color: var(--text); }
   .scanner-sub { font-size: 13px; color: var(--text-2); }
-
   .scan-btn {
     width: 100%;
     background: var(--red);
@@ -178,7 +169,6 @@
     color: var(--text);
     border: 1px solid var(--border);
   }
-
   .divider {
     display: flex;
     align-items: center;
@@ -192,7 +182,6 @@
     height: 1px;
     background: var(--border);
   }
-
   .track-input {
     width: 100%;
     border: 2px solid var(--border);
@@ -208,7 +197,6 @@
   }
   .track-input:focus { border-color: var(--red); }
   .track-input::placeholder { color: var(--text-3); text-transform: none; font-family: 'DM Sans', sans-serif; }
-
   /* ── Recent receipts ── */
   .section-label {
     font-size: 11px;
@@ -260,10 +248,8 @@
     color: var(--text-3);
     font-size: 14px;
   }
-
   /* ── Confirm screen ── */
   .confirm-screen.active { display: block; }
-
   .back-btn {
     display: flex;
     align-items: center;
@@ -277,7 +263,6 @@
     padding: 0;
     margin-bottom: 16px;
   }
-
   .confirm-card {
     background: var(--surface);
     border-radius: var(--radius);
@@ -300,7 +285,6 @@
   }
   .confirm-card-header h2 { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; }
   .confirm-card-header .sub { font-size: 14px; opacity: 0.85; margin-top: 2px; }
-
   .confirm-field {
     padding: 14px 16px;
     border-bottom: 1px solid var(--border);
@@ -316,7 +300,6 @@
   }
   .confirm-field .field-value { font-size: 15px; font-weight: 500; }
   .confirm-field .field-value.mono { font-family: 'DM Mono', monospace; font-size: 14px; }
-
   .items-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
   .item-pill {
     display: inline-flex;
@@ -337,7 +320,6 @@
     background: var(--text-3);
     flex-shrink: 0;
   }
-
   .flag-banner {
     margin: 0 16px 16px;
     background: var(--amber-light);
@@ -350,7 +332,6 @@
   }
   .flag-banner .flag-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
   .flag-banner .flag-text { font-size: 13px; font-weight: 600; color: #92400e; }
-
   .confirm-btn {
     width: 100%;
     background: var(--green);
@@ -367,7 +348,6 @@
   }
   .confirm-btn:active { opacity: 0.85; }
   .confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
   /* ── Success screen ── */
   .success-screen {
     min-height: calc(100dvh - 57px);
@@ -380,7 +360,6 @@
     text-align: center;
   }
   .success-screen.active { display: flex; }
-
   .success-icon {
     width: 80px;
     height: 80px;
@@ -418,7 +397,6 @@
   .success-detail .sd-row:last-child { border-bottom: none; }
   .success-detail .sd-label { color: var(--text-2); }
   .success-detail .sd-value { font-weight: 600; font-family: 'DM Mono', monospace; font-size: 13px; }
-
   .next-btn {
     width: 100%;
     max-width: 320px;
@@ -432,7 +410,6 @@
     font-weight: 700;
     cursor: pointer;
   }
-
   /* ── Error state ── */
   .error-banner {
     background: var(--red-light);
@@ -446,7 +423,6 @@
     display: none;
   }
   .error-banner.visible { display: block; }
-
   /* ── Loading ── */
   .loading-overlay {
     position: fixed;
@@ -470,7 +446,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-text { font-size: 14px; color: var(--text-2); font-weight: 500; }
-
   /* ── Camera modal ── */
   .camera-modal {
     position: fixed;
@@ -484,7 +459,9 @@
   #camera-video {
     flex: 1;
     width: 100%;
+    height: 100%;
     object-fit: cover;
+    background: #000;
   }
   .camera-overlay {
     position: absolute;
@@ -494,13 +471,16 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
+    padding: 24px;
   }
   .scan-frame {
-    width: 240px;
-    height: 120px;
-    border: 2px solid white;
+    width: min(280px, 78vw);
+    height: 150px;
+    border: 2px solid rgba(255,255,255,0.85);
     border-radius: 8px;
     position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 0 100vmax rgba(0,0,0,0.35);
   }
   .scan-frame::before, .scan-frame::after {
     content: '';
@@ -512,17 +492,35 @@
   }
   .scan-frame::before { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 8px 0 0 0; }
   .scan-frame::after { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 8px 0; }
+  .scan-frame.hit { border-color: var(--green); }
   .scan-hint {
     color: white;
     font-size: 14px;
     margin-top: 20px;
-    opacity: 0.8;
+    opacity: 0.9;
     font-weight: 500;
+    text-align: center;
+    line-height: 1.5;
+    max-width: 300px;
+  }
+  .camera-error {
+    display: none;
+    margin-top: 16px;
+    background: rgba(220,38,38,0.95);
+    color: white;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+    max-width: 320px;
+    text-align: center;
+    pointer-events: all;
   }
   .camera-close {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: max(16px, env(safe-area-inset-top));
+    right: 16px;
     background: rgba(0,0,0,0.5);
     border: none;
     color: white;
@@ -535,7 +533,33 @@
     align-items: center;
     justify-content: center;
     pointer-events: all;
+    z-index: 10;
   }
+  .camera-actions {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 20px;
+    z-index: 10;
+  }
+  .camera-action-btn {
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    border-radius: 22px;
+    padding: 11px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+  .camera-action-btn:active { background: rgba(255,255,255,0.3); }
+  .camera-action-btn.on { background: white; color: #111; }
   .scan-line {
     position: absolute;
     left: 0; right: 0;
@@ -548,7 +572,25 @@
     50% { top: 85%; opacity: 1; }
     100% { top: 10%; opacity: 1; }
   }
-
+  /* Camera CTA on the scan screen */
+  .camera-cta {
+    width: 100%;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .camera-cta:active { opacity: 0.85; }
   /* -- Issue logging -- */
   .issue-toggle-btn {
     width: 100%;
@@ -647,7 +689,6 @@
     display: none;
   }
   .issue-photo-preview.visible { display: block; }
-
   /* -- Tabs -- */
   .tab-btn {
     background: none;
@@ -664,7 +705,6 @@
   }
   .tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
   .tab-btn:active { opacity: 0.7; }
-
   /* -- Other orders panel -- */
   .other-orders-btn {
     width: 100%;
@@ -725,7 +765,6 @@
     font-size: 13px;
     color: var(--text-3);
   }
-
   /* -- Item checklist -- */
   .checklist-intro {
     font-size: 13px;
@@ -818,7 +857,6 @@
     color: #92400e;
     margin-top: 2px;
   }
-
   /* -- Complete-check modal -- */
   .complete-modal {
     display: none;
@@ -867,25 +905,27 @@
 </style>
 </head>
 <body>
-
 <!-- Loading overlay -->
 <div class="loading-overlay" id="loading">
   <div class="spinner"></div>
   <div class="loading-text" id="loading-text">Looking up return…</div>
 </div>
-
 <!-- Camera modal -->
 <div class="camera-modal" id="camera-modal">
   <video id="camera-video" autoplay playsinline muted></video>
   <div class="camera-overlay">
-    <div class="scan-frame">
+    <div class="scan-frame" id="scan-frame">
       <div class="scan-line"></div>
     </div>
-    <div class="scan-hint">Hold barcode within frame</div>
+    <div class="scan-hint" id="scan-hint">Hold the barcode inside the frame, about 15–20cm away</div>
+    <div class="camera-error" id="camera-error"></div>
   </div>
   <button class="camera-close" id="camera-close">✕</button>
+  <div class="camera-actions">
+    <button class="camera-action-btn" id="camera-torch-btn" style="display:none">Torch</button>
+    <button class="camera-action-btn" id="camera-manual-btn">Type it instead</button>
+  </div>
 </div>
-
 <!-- Complete-check modal -->
 <div class="complete-modal" id="complete-modal">
   <div class="complete-modal-card">
@@ -900,13 +940,11 @@
     <button class="complete-modal-cancel" onclick="closeCompleteModal()">Cancel</button>
   </div>
 </div>
-
 <!-- Header -->
 <div class="header" id="main-header" style="display:none">
   <div class="header-logo">Baboodle <span>·</span> Returns</div>
   <div class="staff-chip" id="staff-chip-btn">–</div>
 </div>
-
 <!-- SCREEN: Staff picker -->
 <div class="screen staff-screen active" id="screen-staff">
   <div class="staff-logo">Baboodle <span>·</span> Returns</div>
@@ -921,10 +959,8 @@
     <button class="staff-btn" onclick="selectStaff('Dan')">Dan</button>
   </div>
 </div>
-
 <!-- SCREEN: Scan -->
 <div class="screen" id="screen-scan">
-
   <!-- Tab nav -->
   <div style="display:flex;border-bottom:2px solid var(--border);margin:-16px -16px 16px;background:var(--surface);padding:0 16px;position:sticky;top:57px;z-index:50;">
     <button class="tab-btn active" id="tab-log" onclick="switchTab('log')">Log a return</button>
@@ -932,20 +968,22 @@
     <button class="tab-btn" id="tab-manual" onclick="switchTab('manual')">Manual checks <span id="manual-count-badge" style="display:none;background:var(--red);color:white;border-radius:10px;padding:1px 6px;font-size:11px;margin-left:4px"></span></button>
     <button class="tab-btn" id="tab-incomplete" onclick="switchTab('incomplete')">Incomplete <span id="incomplete-count-badge" style="display:none;background:#f59e0b;color:white;border-radius:10px;padding:1px 6px;font-size:11px;margin-left:4px"></span></button>
   </div>
-
   <!-- LOG TAB -->
   <div id="tab-content-log">
+      <!-- Phone camera scanning -->
+      <button class="camera-cta" id="camera-cta-btn" onclick="openCamera()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Scan with camera
+      </button>
       <!-- Scanner input: inputmode=none prevents soft keyboard on Android -->
       <input id="track-input" type="text" inputmode="none" autocomplete="off" autocorrect="off" spellcheck="false"
         class="track-input" placeholder="Waiting for scan..."
         style="text-align:center;font-size:14px;color:var(--text-3);cursor:default;margin-bottom:10px;">
-
       <div class="scanner-target" id="scanner-target-el" style="margin-bottom:10px;">
         <svg width="36" height="36" fill="none" stroke="#dc2626" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 5h2M7 5h1M3 5v2M21 5h-2M17 5h-1M21 5v2M3 19h2M7 19h1M3 19v-2M21 19h-2M17 19h-1M21 19v-2"/><line x1="4" y1="12" x2="20" y2="12" stroke="#dc2626" stroke-width="2"/></svg>
         <div class="scanner-label">Ready to scan</div>
-        <div class="scanner-sub">Point scanner at the Royal Mail barcode and pull trigger</div>
+        <div class="scanner-sub">Point a handheld scanner at the Royal Mail barcode and pull the trigger</div>
       </div>
-
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
         <input id="manual-input" type="text" placeholder="Type tracking number manually"
           autocomplete="off" autocorrect="off" spellcheck="false"
@@ -953,7 +991,6 @@
         <button class="scan-btn" onclick="lookupManual()" style="width:auto;padding:14px 16px;margin:0;flex-shrink:0;">Go</button>
       </div>
       <div class="error-banner" id="scan-error">Unable to match this tracking number. Please check and try again.</div>
-
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
     <div class="section-label" style="margin:0">Received today</div>
     <input id="history-search-today" type="text" placeholder="Search..." autocomplete="off"
@@ -964,7 +1001,6 @@
     <div class="empty-state">No receipts logged today yet</div>
   </div>
   </div> <!-- end tab-content-log -->
-
   <!-- HISTORY TAB -->
   <div id="tab-content-history" style="display:none">
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
@@ -1032,7 +1068,6 @@
     </div>
     <div id="history-list"><div class="empty-state">Enter a search term or date above</div></div>
   </div>
-
   <!-- MANUAL CHECKS TAB -->
   <div id="tab-content-manual" style="display:none">
     <div style="background:var(--amber-light);border:1px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;margin-bottom:16px;">
@@ -1040,7 +1075,6 @@
     </div>
     <div id="manual-list"><div class="empty-state">No items in manual checks</div></div>
   </div>
-
   <!-- INCOMPLETE TAB -->
   <div id="tab-content-incomplete" style="display:none">
     <div style="background:var(--amber-light);border:1px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;margin-bottom:16px;">
@@ -1048,9 +1082,7 @@
     </div>
     <div id="incomplete-list"><div class="empty-state">No incomplete returns flagged</div></div>
   </div>
-
 </div>
-
 <!-- SCREEN: Receipt detail -->
 <div class="screen" id="screen-receipt">
   <button class="back-btn" onclick="goBackFromReceipt()">
@@ -1059,14 +1091,12 @@
   </button>
   <div id="receipt-detail-content"></div>
 </div>
-
 <!-- SCREEN: Confirm -->
 <div class="screen" id="screen-confirm">
   <button class="back-btn" onclick="goBack()">
     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     Back
   </button>
-
   <div class="confirm-card" id="confirm-card">
     <div class="confirm-card-header">
       <div class="label">Return found</div>
@@ -1082,45 +1112,36 @@
       <div class="field-value mono" id="confirm-postcode">-</div>
     </div>
   </div>
-
   <div id="match-warning" style="display:none;margin-bottom:16px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;">
     &#9888; Order number and email don't match. Please manually confirm in Supercycle before confirming receipt.
   </div>
-
   <div id="replacement-warning" style="display:none;margin-bottom:16px;background:#fef3c7;border:2px solid #f59e0b;border-radius:8px;padding:14px;font-size:13px;font-weight:600;color:#92400e;">
     &#9888; Replacement return. Add to Manual Checks to make sure we are cancelling the correct rental.
     <button onclick="addToManualChecks()" style="display:block;margin-top:10px;background:#f59e0b;color:white;border:none;border-radius:6px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;" id="manual-check-btn">Add to Manual Checks</button>
     <div id="manual-check-added" style="display:none;margin-top:8px;color:#16a34a;font-weight:600;">Added to Manual Checks</div>
   </div>
-
   <div id="partial-banner" style="display:none;margin-bottom:16px;background:#eff6ff;border:2px solid #3b82f6;border-radius:8px;padding:14px;font-size:13px;color:#1e40af;">
     <div style="font-weight:700;margin-bottom:4px;">Partial return already logged for this order</div>
     <div id="partial-banner-note" style="font-style:italic;"></div>
     <div style="margin-top:6px;font-size:12px;color:#3b82f6;">Confirm full receipt below to stop billing.</div>
   </div>
-
   <div class="section-label" style="margin-top:8px">Items on this order</div>
   <div class="checklist-intro">Tick each item you are physically receiving in this box</div>
   <div id="rental-checklist"></div>
-
   <button class="other-orders-btn" id="other-orders-btn" onclick="toggleOtherOrders()">Items don't match? View customer's other orders</button>
-
   <button class="other-orders-btn" id="manual-check-always-btn" onclick="addToManualChecks()" style="border-color:#f59e0b;color:#92400e;">
     &#9873; Add to Manual Checks
   </button>
   <div id="manual-check-added-always" style="display:none;text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-bottom:4px;">Added to Manual Checks</div>
-
   <div class="other-orders-panel" id="other-orders-panel">
     <div class="other-orders-loading" id="other-orders-loading">Loading other orders...</div>
     <div id="other-orders-list"></div>
   </div>
-
   <!-- Issue logging -->
   <button class="issue-toggle-btn" id="issue-toggle-btn" onclick="toggleIssuePanel()">
     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     Log an issue with this return
   </button>
-
   <div class="issue-panel hidden" id="issue-panel">
     <div class="issue-panel-title">Issue details</div>
     <select class="issue-select" id="issue-type">
@@ -1139,11 +1160,9 @@
     </button>
     <img class="issue-photo-preview" id="issue-photo-preview" alt="Issue photo">
   </div>
-
   <button class="confirm-btn" id="confirm-btn" onclick="confirmReceipt()" style="margin-top:8px">
     Confirm receipt
   </button>
-
   <button class="other-orders-btn" id="partial-btn" onclick="togglePartialPanel()" style="margin-top:6px;border-color:#3b82f6;color:#1e40af;">
     Mark as partially received
   </button>
@@ -1154,7 +1173,6 @@
   </div>
   <div class="error-banner" id="confirm-error">Failed to log receipt. Please try again.</div>
 </div>
-
 <!-- SCREEN: Success -->
 <div class="screen success-screen" id="screen-success">
   <div class="success-icon">✓</div>
@@ -1170,7 +1188,6 @@
   </div>
   <button class="next-btn" onclick="scanAnother()">Scan another return</button>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // Standalone staff handler - works even if main script fails
@@ -1186,7 +1203,6 @@ function selectStaff(name) {
 </script>
 <script>
 (function() {
-
 const SUPABASE_URL = 'https://rousljiuoswvbszgfmys.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdXNsaml1b3N3dmJzemdmbXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTkwMDYsImV4cCI6MjA5MTEzNTAwNn0.pIz0ESqkXP6wqjI4H0sOOR-5diZTSQzSh9bksRLzaI0';
 const ERP_URL = 'https://zatjokylncxbeppwzqxu.supabase.co';
@@ -1194,16 +1210,13 @@ const ERP_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const erpDb = createClient(ERP_URL, ERP_ANON_KEY);
-
 let currentStaff = null;
 let currentReturn = null; // { rm, shopifyOrder, matchConfidence, rentals }
-
 // ---- Multi-part products ----
 // Products on this list require staff to confirm the FULL product is present
 // before we fire Supercycle's createReturn (which cancels the rental).
 let multiPartTitles = new Set();
 let pendingCompleteEl = null; // the rental-item div currently in the complete-check modal
-
 async function loadMultiPartProducts() {
   try {
     const { data } = await db.from('multipart_products').select('product_title');
@@ -1215,12 +1228,10 @@ async function loadMultiPartProducts() {
 function isMultiPartTitle(title) {
   return multiPartTitles.has((title || '').trim().toLowerCase());
 }
-
 function normaliseOrder(val) {
   if (!val) return '';
   return String(val).replace(/[^0-9]/g, '').replace(/^0+/, '');
 }
-
 // ---- Supercycle proxy call ----
 async function supercycle(action, payload) {
   const res = await fetch('/.netlify/functions/supercycle', {
@@ -1231,18 +1242,15 @@ async function supercycle(action, payload) {
   if (!res.ok) throw new Error('Supercycle call failed: ' + res.status);
   return res.json();
 }
-
 // ---- Init ----
 const stored = localStorage.getItem('bbl_staff');
 if (stored) { currentStaff = stored; showApp(); }
-
 function selectStaff(name) {
   currentStaff = name;
   localStorage.setItem('bbl_staff', name);
   showApp();
 }
 window.selectStaff = selectStaff;
-
 function showApp() {
   document.getElementById('main-header').style.display = 'flex';
   document.getElementById('staff-chip-btn').textContent = currentStaff;
@@ -1254,7 +1262,6 @@ window.__bblShowApp = function(name) {
   currentStaff = name;
   showApp();
 };
-
 document.getElementById('staff-chip-btn').addEventListener('click', () => {
   if (confirm('Switch staff member?')) {
     localStorage.removeItem('bbl_staff');
@@ -1263,7 +1270,6 @@ document.getElementById('staff-chip-btn').addEventListener('click', () => {
     showScreen('staff');
   }
 });
-
 // ---- Screens ----
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1272,7 +1278,6 @@ function showScreen(name) {
     setTimeout(focusScannerInput, 100);
   }
 }
-
 function goBack() {
   showScreen('scan');
   document.getElementById('scan-error').classList.remove('visible');
@@ -1282,20 +1287,17 @@ function goBack() {
   resetIssuePanel();
 }
 window.goBack = goBack;
-
 // ---- Scanner input ----
 const trackInput = document.getElementById('track-input');
 const manualInput = document.getElementById('manual-input');
-
 // Auto-focus scanner input on scan screen — inputmode=none prevents keyboard
 function focusScannerInput() {
+  if (cameraActive) return; // don't steal focus while the camera is open
   trackInput.focus({ preventScroll: true });
 }
-
 // Tap scanner target or the input itself to re-focus
 document.getElementById('scanner-target-el').addEventListener('click', focusScannerInput);
 trackInput.addEventListener('click', focusScannerInput);
-
 // Scanner input handler
 let scanDebounce = null;
 trackInput.addEventListener('input', () => {
@@ -1311,7 +1313,6 @@ trackInput.addEventListener('input', () => {
     }, 300);
   }
 });
-
 trackInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     clearTimeout(scanDebounce);
@@ -1323,7 +1324,6 @@ trackInput.addEventListener('keydown', e => {
     }
   }
 });
-
 // Show scanned value in the input while scanning
 trackInput.addEventListener('input', () => {
   if (trackInput.value) {
@@ -1331,27 +1331,321 @@ trackInput.addEventListener('input', () => {
     trackInput.placeholder = '';
   }
 }, { capture: true });
-
 // Manual input
 manualInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') lookupManual();
 });
-
 function lookupManual() {
   const val = manualInput.value.trim().toUpperCase();
   if (!val) return;
   lookupTracking(val);
 }
 window.lookupManual = lookupManual;
-
+/* =========================================================================
+   CAMERA BARCODE SCANNING
+   -------------------------------------------------------------------------
+   iOS Safari has no native BarcodeDetector, so we decode frames ourselves
+   with ZXing (loaded lazily from CDN the first time the camera is opened).
+   Where BarcodeDetector *does* exist (Android Chrome) we use it instead —
+   it's faster and uses no extra bandwidth.
+   Requires HTTPS. Works in Safari, and in the home-screen PWA on iOS 14.3+.
+   ========================================================================= */
+const ZXING_SRC = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+let cameraActive = false;
+let cameraStream = null;
+let scanTimer = null;
+let zxingLoader = null;
+let zxingReader = null;
+let nativeDetector = null;
+let frameCount = 0;
+let audioCtx = null;
+const cameraModal = document.getElementById('camera-modal');
+const cameraVideo = document.getElementById('camera-video');
+const cameraErrorEl = document.getElementById('camera-error');
+const scanHintEl = document.getElementById('scan-hint');
+const scanFrameEl = document.getElementById('scan-frame');
+const torchBtn = document.getElementById('camera-torch-btn');
+// Offscreen canvas used for frame grabs
+const scanCanvas = document.createElement('canvas');
+const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
+const rotCanvas = document.createElement('canvas');
+const rotCtx = rotCanvas.getContext('2d', { willReadFrequently: true });
+function loadZXing() {
+  if (window.ZXing) return Promise.resolve();
+  if (zxingLoader) return zxingLoader;
+  zxingLoader = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = ZXING_SRC;
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => { zxingLoader = null; reject(new Error('zxing load failed')); };
+    document.head.appendChild(s);
+  });
+  return zxingLoader;
+}
+// Warm the library up in the background so the first scan isn't slow
+setTimeout(() => { loadZXing().catch(() => {}); }, 3000);
+function showCameraError(msg) {
+  cameraErrorEl.textContent = msg;
+  cameraErrorEl.style.display = 'block';
+  scanHintEl.style.display = 'none';
+}
+function setHint(msg) {
+  scanHintEl.textContent = msg;
+  scanHintEl.style.display = 'block';
+  cameraErrorEl.style.display = 'none';
+}
+function beep() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = 1180;
+    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.16);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.17);
+  } catch(e) {}
+  try { if (navigator.vibrate) navigator.vibrate(60); } catch(e) {}
+}
+async function openCamera() {
+  if (cameraActive) return;
+  cameraActive = true;
+  frameCount = 0;
+  cameraModal.classList.add('visible');
+  scanFrameEl.classList.remove('hit');
+  setHint('Starting camera…');
+  try { trackInput.blur(); } catch(e) {}
+  // Prime the audio context inside the user gesture (needed on iOS)
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch(e) {}
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showCameraError('This browser can’t open the camera. Open the app in Safari (not inside another app) and try again.');
+    return;
+  }
+  // Start the camera and load the decoder at the same time
+  const decoderReady = setupDecoder();
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        advanced: [{ focusMode: 'continuous' }]
+      }
+    });
+  } catch(err) {
+    console.warn('getUserMedia failed', err);
+    const name = err && err.name;
+    if (name === 'NotAllowedError' || name === 'SecurityError') {
+      showCameraError('Camera access was blocked. On iPhone: Settings › Safari › Camera › Allow, then reload this page.');
+    } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+      showCameraError('No back camera found on this device.');
+    } else if (name === 'NotReadableError') {
+      showCameraError('The camera is being used by another app. Close it and try again.');
+    } else {
+      showCameraError('Could not start the camera. Make sure the app is opened over https.');
+    }
+    return;
+  }
+  cameraVideo.srcObject = cameraStream;
+  cameraVideo.setAttribute('playsinline', 'true');
+  try { await cameraVideo.play(); } catch(e) {}
+  setupTorch();
+  try {
+    await decoderReady;
+  } catch(e) {
+    showCameraError('Could not load the barcode decoder. Check the connection, or type the number in manually.');
+    return;
+  }
+  setHint('Hold the barcode inside the frame, about 15–20cm away');
+  scanTimer = setInterval(scanFrame, 120);
+}
+window.openCamera = openCamera;
+async function setupDecoder() {
+  // Native detector (Android Chrome) — fastest path
+  if (!nativeDetector && 'BarcodeDetector' in window) {
+    try {
+      const supported = await window.BarcodeDetector.getSupportedFormats();
+      const want = ['code_128', 'code_39', 'code_93', 'data_matrix', 'qr_code', 'itf'].filter(f => supported.includes(f));
+      if (want.length) {
+        nativeDetector = new window.BarcodeDetector({ formats: want });
+        return;
+      }
+    } catch(e) { nativeDetector = null; }
+  }
+  if (nativeDetector) return;
+  await loadZXing();
+  if (!zxingReader) {
+    const Z = window.ZXing;
+    const hints = new Map();
+    hints.set(Z.DecodeHintType.POSSIBLE_FORMATS, [
+      Z.BarcodeFormat.CODE_128,
+      Z.BarcodeFormat.CODE_39,
+      Z.BarcodeFormat.CODE_93,
+      Z.BarcodeFormat.DATA_MATRIX,
+      Z.BarcodeFormat.QR_CODE,
+      Z.BarcodeFormat.ITF
+    ]);
+    hints.set(Z.DecodeHintType.TRY_HARDER, true);
+    zxingReader = new Z.MultiFormatReader();
+    zxingReader.setHints(hints);
+  }
+}
+// ZXing's RGBLuminanceSource does NOT convert RGBA for us — it takes a
+// one-byte-per-pixel luminance buffer, so build that ourselves.
+let grayBuf = null;
+function decodeCanvas(canvas, ctx) {
+  const w = canvas.width, h = canvas.height;
+  if (!w || !h) return null;
+  const Z = window.ZXing;
+  try {
+    const px = ctx.getImageData(0, 0, w, h).data;
+    const n = w * h;
+    if (!grayBuf || grayBuf.length !== n) grayBuf = new Uint8ClampedArray(n);
+    for (let i = 0, j = 0; i < n; i++, j += 4) {
+      grayBuf[i] = (px[j] * 0.299 + px[j + 1] * 0.587 + px[j + 2] * 0.114) | 0;
+    }
+    const source = new Z.RGBLuminanceSource(grayBuf, w, h);
+    const bitmap = new Z.BinaryBitmap(new Z.HybridBinarizer(source));
+    const result = zxingReader.decode(bitmap);
+    return result ? result.getText() : null;
+  } catch(e) {
+    return null; // NotFoundException on most frames — normal
+  } finally {
+    try { zxingReader.reset(); } catch(e) {}
+  }
+}
+async function scanFrame() {
+  if (!cameraActive) return;
+  const vw = cameraVideo.videoWidth, vh = cameraVideo.videoHeight;
+  if (!vw || !vh) return;
+  frameCount++;
+  // Crop a central band roughly matching the on-screen frame, but generous
+  // enough that a slightly-off aim still decodes.
+  const cropW = Math.round(vw * 0.92);
+  const cropH = Math.round(vh * 0.45);
+  const sx = Math.round((vw - cropW) / 2);
+  const sy = Math.round((vh - cropH) / 2);
+  // Scale down for speed — 900px across is plenty for Code128
+  const scale = Math.min(1, 900 / cropW);
+  const dw = Math.round(cropW * scale), dh = Math.round(cropH * scale);
+  scanCanvas.width = dw; scanCanvas.height = dh;
+  scanCtx.drawImage(cameraVideo, sx, sy, cropW, cropH, 0, 0, dw, dh);
+  let text = null;
+  if (nativeDetector) {
+    try {
+      const codes = await nativeDetector.detect(scanCanvas);
+      if (codes && codes.length) text = codes[0].rawValue;
+    } catch(e) {}
+  } else if (zxingReader) {
+    text = decodeCanvas(scanCanvas, scanCtx);
+    // Every third frame, also try a 90° rotation in case the label is sideways
+    if (!text && frameCount % 3 === 0) {
+      rotCanvas.width = dh; rotCanvas.height = dw;
+      rotCtx.save();
+      rotCtx.translate(dh / 2, dw / 2);
+      rotCtx.rotate(Math.PI / 2);
+      rotCtx.drawImage(scanCanvas, -dw / 2, -dh / 2);
+      rotCtx.restore();
+      text = decodeCanvas(rotCanvas, rotCtx);
+    }
+  }
+  if (text) onBarcode(text);
+}
+function setupTorch() {
+  torchBtn.style.display = 'none';
+  try {
+    const track = cameraStream && cameraStream.getVideoTracks()[0];
+    if (!track || !track.getCapabilities) return;
+    const caps = track.getCapabilities();
+    if (!caps || !caps.torch) return; // iOS Safari: not supported
+    torchBtn.style.display = 'block';
+    torchBtn.classList.remove('on');
+    torchBtn.onclick = async () => {
+      const on = !torchBtn.classList.contains('on');
+      try {
+        await track.applyConstraints({ advanced: [{ torch: on }] });
+        torchBtn.classList.toggle('on', on);
+      } catch(e) {}
+    };
+  } catch(e) {}
+}
+// Royal Mail labels carry the tracking number in a 1D Code128 barcode and,
+// on newer labels, a 2D matrix whose payload wraps the number in extra data.
+// Build a small candidate list rather than trusting one reading.
+function trackingCandidates(raw) {
+  const out = [];
+  const push = v => { if (v && out.indexOf(v) === -1) out.push(v); };
+  const t = String(raw || '').trim().toUpperCase();
+  const rmMatch = t.match(/[A-Z]{2}\d{9}[A-Z]{2}/);   // e.g. AB123456789GB
+  if (rmMatch) push(rmMatch[0]);
+  const numeric = t.match(/\d{12,24}/);                // barcoded numeric refs
+  if (numeric) push(numeric[0]);
+  push(t.replace(/[^A-Z0-9]/g, ''));
+  push(t);
+  return out.filter(Boolean);
+}
+async function onBarcode(rawText) {
+  if (!cameraActive) return;
+  cameraActive = false;               // stop the loop immediately
+  clearInterval(scanTimer); scanTimer = null;
+  scanFrameEl.classList.add('hit');
+  setHint('Got it — looking up…');
+  beep();
+  const candidates = trackingCandidates(rawText);
+  let chosen = candidates[0];
+  // One query to see which of the candidate readings we actually hold
+  try {
+    const { data } = await db.from('royal_mail')
+      .select('tracking_number')
+      .in('tracking_number', candidates)
+      .limit(1);
+    if (data && data.length) chosen = data[0].tracking_number;
+  } catch(e) {}
+  closeCamera();
+  lookupTracking(chosen);
+}
+function closeCamera() {
+  cameraActive = false;
+  if (scanTimer) { clearInterval(scanTimer); scanTimer = null; }
+  try {
+    if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+  } catch(e) {}
+  cameraStream = null;
+  try { cameraVideo.pause(); cameraVideo.srcObject = null; } catch(e) {}
+  cameraModal.classList.remove('visible');
+  scanFrameEl.classList.remove('hit');
+  torchBtn.style.display = 'none';
+  cameraErrorEl.style.display = 'none';
+  setTimeout(focusScannerInput, 200);
+}
+window.closeCamera = closeCamera;
+document.getElementById('camera-close').addEventListener('click', closeCamera);
+document.getElementById('camera-manual-btn').addEventListener('click', () => {
+  closeCamera();
+  setTimeout(() => {
+    const el = document.getElementById('manual-input');
+    el.focus();
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 250);
+});
+// Free the camera if the app is backgrounded (iOS suspends the stream anyway)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && cameraActive) closeCamera();
+});
+/* ===================== end camera barcode scanning ====================== */
 // ---- Lookup ----
 async function lookupTracking(raw) {
   raw = (raw || '').trim().toUpperCase();
   if (!raw) return;
-
   document.getElementById('scan-error').classList.remove('visible');
   showLoading('Looking up return...');
-
   try {
     // Step 1: royal_mail record
     const { data: rm, error: rmErr } = await db
@@ -1359,16 +1653,13 @@ async function lookupTracking(raw) {
       .select('tracking_number, order_number, customer_name, customer_email, customer_postcode, status, received_at, received_by')
       .eq('tracking_number', raw)
       .maybeSingle();
-
     if (rmErr) throw rmErr;
-
     if (!rm) {
       hideLoading();
-      document.getElementById('scan-error').textContent = 'Tracking number not found. Please check and try again.';
+      document.getElementById('scan-error').textContent = 'Tracking number not found (' + raw + '). Please check and try again.';
       document.getElementById('scan-error').classList.add('visible');
       return;
     }
-
     if (rm.received_at) {
       hideLoading();
       const t = new Date(rm.received_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -1376,7 +1667,6 @@ async function lookupTracking(raw) {
       document.getElementById('scan-error').classList.add('visible');
       return;
     }
-
     // Check for existing partial receipt on same order number
     let existingPartial = null;
     if (rm.order_number) {
@@ -1389,11 +1679,9 @@ async function lookupTracking(raw) {
         .maybeSingle();
       existingPartial = partialData || null;
     }
-
     // Steps 2 & 3 in parallel: shopify lookup + order-number-based Supercycle lookup
     showLoading('Loading order details...');
     const normRm = normaliseOrder(rm.order_number);
-
     const [erpResult, scByOrderResult] = await Promise.all([
       // ERP: try exact order number first
       erpDb.from('shopify_orders')
@@ -1404,10 +1692,8 @@ async function lookupTracking(raw) {
       // Supercycle: search by order name in parallel
       supercycle('getRentals', { orderName: rm.order_number }).catch(() => null)
     ]);
-
     let shopifyOrder = erpResult.data || null;
     let matchConfidence = shopifyOrder ? 'full' : 'none';
-
     // If no exact order number match, fall back to email match
     if (!shopifyOrder && rm.customer_email) {
       const { data: byEmail } = await erpDb
@@ -1421,7 +1707,6 @@ async function lookupTracking(raw) {
         .maybeSingle();
       if (byEmail) { shopifyOrder = byEmail; matchConfidence = 'partial'; }
     }
-
     // Get rentals — if we have a numeric Shopify ID now, re-fetch with it for accuracy
     let rentals = (scByOrderResult && scByOrderResult.data) || [];
     if (shopifyOrder && shopifyOrder.id && rentals.length === 0) {
@@ -1430,11 +1715,9 @@ async function lookupTracking(raw) {
         rentals = scData.data || [];
       } catch(e) {}
     }
-
     currentReturn = { rm, shopifyOrder, matchConfidence, rentals, existingPartial };
     hideLoading();
     showConfirm(currentReturn);
-
   } catch(e) {
     hideLoading();
     console.error(e);
@@ -1443,16 +1726,13 @@ async function lookupTracking(raw) {
   }
 }
 window.lookupTracking = lookupTracking;
-
 // ---- Confirm screen ----
 function showConfirm({ rm, shopifyOrder, matchConfidence, rentals }) {
   document.getElementById('confirm-order').textContent = rm.order_number || (shopifyOrder && shopifyOrder.order_name) || '--';
   document.getElementById('confirm-tracking').textContent = rm.tracking_number;
   document.getElementById('confirm-customer').textContent = rm.customer_name || (shopifyOrder && shopifyOrder.full_name) || '--';
   document.getElementById('confirm-postcode').textContent = rm.customer_postcode || (shopifyOrder && shopifyOrder.postcode) || '--';
-
   document.getElementById('match-warning').style.display = matchConfidence === 'partial' ? 'block' : 'none';
-
   // Show partial banner if another box was already received
   const existingPartial = currentReturn.existingPartial;
   const partialBanner = document.getElementById('partial-banner');
@@ -1462,24 +1742,20 @@ function showConfirm({ rm, shopifyOrder, matchConfidence, rentals }) {
   } else {
     partialBanner.style.display = 'none';
   }
-
   // Reset partial panel
   document.getElementById('partial-panel').style.display = 'none';
   document.getElementById('partial-btn').textContent = 'Mark as partially received';
   document.getElementById('partial-btn').style.borderColor = '#3b82f6';
   document.getElementById('partial-btn').style.color = '#1e40af';
-
   // Check for replacement tag
   const tags = (shopifyOrder && shopifyOrder.tags) || '';
   const isReplacement = tags.toLowerCase().includes('replacement');
   document.getElementById('replacement-warning').style.display = isReplacement ? 'block' : 'none';
   document.getElementById('manual-check-btn').style.display = 'block';
   document.getElementById('manual-check-added').style.display = 'none';
-
   // Build rental checklist
   const checklist = document.getElementById('rental-checklist');
   checklist.innerHTML = '';
-
   if (rentals.length === 0) {
     checklist.innerHTML = '<div class="no-rentals">No active rentals found in Supercycle for this order. Please check manually before confirming.</div>';
   } else {
@@ -1489,7 +1765,6 @@ function showConfirm({ rm, shopifyOrder, matchConfidence, rentals }) {
       const variant = (rental.item && rental.item.variantTitle) ? rental.item.variantTitle : '';
       const methodType = rental.methodType || '';
       const multiPart = isMultiPartTitle(title);
-
       const div = document.createElement('div');
       div.className = 'rental-item' + (alreadyReceived ? ' already-received' : '');
       div.dataset.rentalId = rental.id;
@@ -1499,9 +1774,8 @@ function showConfirm({ rm, shopifyOrder, matchConfidence, rentals }) {
       div.dataset.multipart = multiPart ? 'true' : 'false';
       div.dataset.title = title;
       div.dataset.variant = variant;
-
       div.innerHTML = `
-        <div class="rental-checkbox">${alreadyReceived ? '\u2713' : ''}</div>
+        <div class="rental-checkbox">${alreadyReceived ? '✓' : ''}</div>
         <div class="rental-item-info">
           <div class="rental-item-title">${title}</div>
           ${variant ? '<div class="rental-item-sub">' + variant + '</div>' : ''}
@@ -1509,22 +1783,17 @@ function showConfirm({ rm, shopifyOrder, matchConfidence, rentals }) {
         </div>
         <div class="rental-item-badge">${alreadyReceived ? 'Received' : methodType}</div>
       `;
-
       if (!alreadyReceived) {
         div.addEventListener('click', () => toggleRentalItem(div));
       }
-
       checklist.appendChild(div);
     });
   }
-
   document.getElementById('confirm-error').classList.remove('visible');
   showScreen('confirm');
 }
-
 function toggleRentalItem(el) {
   const checked = el.dataset.checked === 'true';
-
   // Unchecking (or clearing an incomplete flag) always just resets the item
   if (checked) {
     el.dataset.checked = 'false';
@@ -1534,18 +1803,15 @@ function toggleRentalItem(el) {
     el.querySelector('.rental-checkbox').textContent = '';
     return;
   }
-
   // Checking a multi-part item routes through the complete-check modal first
   if (el.dataset.multipart === 'true') {
     openCompleteModal(el);
     return;
   }
-
   el.dataset.checked = 'true';
   el.classList.add('checked');
-  el.querySelector('.rental-checkbox').textContent = '\u2713';
+  el.querySelector('.rental-checkbox').textContent = '✓';
 }
-
 // ---- Complete-check modal ----
 function openCompleteModal(el) {
   pendingCompleteEl = el;
@@ -1557,7 +1823,6 @@ function openCompleteModal(el) {
   document.getElementById('complete-modal').classList.add('visible');
 }
 window.openCompleteModal = openCompleteModal;
-
 function resolveCompleteModal(isComplete) {
   if (!pendingCompleteEl) return;
   if (isComplete) {
@@ -1565,14 +1830,13 @@ function resolveCompleteModal(isComplete) {
     el.dataset.checked = 'true';
     el.dataset.incomplete = 'false';
     el.classList.add('checked');
-    el.querySelector('.rental-checkbox').textContent = '\u2713';
+    el.querySelector('.rental-checkbox').textContent = '✓';
     closeCompleteModal();
   } else {
     document.getElementById('complete-modal-missing').style.display = 'block';
   }
 }
 window.resolveCompleteModal = resolveCompleteModal;
-
 function confirmIncompleteItem() {
   if (!pendingCompleteEl) return;
   const notes = document.getElementById('complete-modal-notes').value.trim();
@@ -1585,21 +1849,18 @@ function confirmIncompleteItem() {
   el.dataset.incomplete = 'true';
   el.dataset.missingNotes = notes;
   el.classList.add('checked', 'incomplete-flag');
-  el.querySelector('.rental-checkbox').textContent = '\u2713';
+  el.querySelector('.rental-checkbox').textContent = '✓';
   el.querySelector('.rental-item-badge').textContent = 'Incomplete — flagged';
   closeCompleteModal();
 }
 window.confirmIncompleteItem = confirmIncompleteItem;
-
 function closeCompleteModal() {
   pendingCompleteEl = null;
   document.getElementById('complete-modal').classList.remove('visible');
 }
 window.closeCompleteModal = closeCompleteModal;
-
 // ---- Other orders ----
 let otherOrdersLoaded = false;
-
 async function toggleOtherOrders() {
   const panel = document.getElementById('other-orders-panel');
   const isVisible = panel.classList.contains('visible');
@@ -1609,13 +1870,11 @@ async function toggleOtherOrders() {
   }
   panel.classList.add('visible');
   if (otherOrdersLoaded) return;
-
   const email = currentReturn.rm.customer_email;
   if (!email) {
     document.getElementById('other-orders-loading').textContent = 'No email found for this customer.';
     return;
   }
-
   try {
     const { data: orders } = await erpDb
       .from('shopify_orders')
@@ -1623,20 +1882,16 @@ async function toggleOtherOrders() {
       .eq('customer_email', email)
       .gt('id', 1000000)
       .order('id', { ascending: false });
-
     const filtered = (orders || []).filter(o => {
       const tags = o.tags || '';
       return !tags.includes('Recurring order');
     });
-
     document.getElementById('other-orders-loading').style.display = 'none';
     const list = document.getElementById('other-orders-list');
-
     if (filtered.length === 0) {
       list.innerHTML = '<div class="other-orders-loading">No other orders found.</div>';
       return;
     }
-
     list.innerHTML = '';
     filtered.forEach(o => {
       let itemsText = '';
@@ -1654,7 +1909,6 @@ async function toggleOtherOrders() {
       row.addEventListener('click', () => selectOtherOrder(o.id, o.order_number));
       list.appendChild(row);
     });
-
     otherOrdersLoaded = true;
   } catch(e) {
     console.error(e);
@@ -1662,7 +1916,6 @@ async function toggleOtherOrders() {
   }
 }
 window.toggleOtherOrders = toggleOtherOrders;
-
 async function selectOtherOrder(shopifyId, orderNumber) {
   // Update currentReturn with the selected order
   const { data: order } = await erpDb
@@ -1670,20 +1923,15 @@ async function selectOtherOrder(shopifyId, orderNumber) {
     .select('id, order_number, customer_email, tags, raw')
     .eq('id', parseInt(shopifyId))
     .maybeSingle();
-
   if (!order) return;
-
   currentReturn.shopifyOrder = order;
   currentReturn.matchConfidence = 'manual';
-
   // Update header
   document.getElementById('confirm-order').textContent = orderNumber;
-
   // Update items from Supercycle for new order
   document.getElementById('rental-checklist').innerHTML = '<div class="other-orders-loading">Loading items...</div>';
   document.getElementById('other-orders-panel').classList.remove('visible');
   document.getElementById('other-orders-btn').textContent = 'Order changed to ' + orderNumber + ' — Items don\'t match?';
-
   showLoading('Loading items from Supercycle...');
   try {
     const scData = await supercycle('getRentals', { shopifyOrderId: parseInt(shopifyId), orderName: orderNumber });
@@ -1692,7 +1940,6 @@ async function selectOtherOrder(shopifyId, orderNumber) {
     currentReturn.rentals = [];
   }
   hideLoading();
-
   // Rebuild checklist
   const checklist = document.getElementById('rental-checklist');
   checklist.innerHTML = '';
@@ -1714,7 +1961,7 @@ async function selectOtherOrder(shopifyId, orderNumber) {
       div.dataset.multipart = multiPart ? 'true' : 'false';
       div.dataset.title = title;
       div.dataset.variant = variant;
-      div.innerHTML = `<div class="rental-checkbox">${alreadyReceived ? '\u2713' : ''}</div>
+      div.innerHTML = `<div class="rental-checkbox">${alreadyReceived ? '✓' : ''}</div>
         <div class="rental-item-info">
           <div class="rental-item-title">${title}</div>
           ${variant ? '<div class="rental-item-sub">' + variant + '</div>' : ''}
@@ -1727,10 +1974,8 @@ async function selectOtherOrder(shopifyId, orderNumber) {
   }
 }
 window.selectOtherOrder = selectOtherOrder;
-
 // ---- Issue logging ----
 let issuePhotoFile = null;
-
 function toggleIssuePanel() {
   const panel = document.getElementById('issue-panel');
   const btn = document.getElementById('issue-toggle-btn');
@@ -1740,7 +1985,6 @@ function toggleIssuePanel() {
   btn.style.borderColor = isHidden ? 'var(--red)' : 'var(--border)';
 }
 window.toggleIssuePanel = toggleIssuePanel;
-
 document.getElementById('issue-photo-input').addEventListener('change', function() {
   const file = this.files[0];
   if (!file) return;
@@ -1756,7 +2000,6 @@ document.getElementById('issue-photo-input').addEventListener('change', function
   };
   reader.readAsDataURL(file);
 });
-
 async function uploadIssuePhoto(file) {
   const ext = file.name.split('.').pop() || 'jpg';
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
@@ -1768,17 +2011,14 @@ async function uploadIssuePhoto(file) {
   const { data: urlData } = db.storage.from('issue-photos').getPublicUrl(filename);
   return urlData.publicUrl;
 }
-
 async function logIssue(rm, shopifyOrder) {
   const issueType = document.getElementById('issue-type').value;
   const notes = document.getElementById('issue-notes').value.trim();
   if (!issueType) return; // no issue type selected, skip
-
   let photoUrl = null;
   if (issuePhotoFile) {
     try { photoUrl = await uploadIssuePhoto(issuePhotoFile); } catch(e) { console.warn('Photo upload failed:', e); }
   }
-
   await db.from('issues').insert({
     logged_at_stage: 'return',
     issue_type: issueType,
@@ -1791,7 +2031,6 @@ async function logIssue(rm, shopifyOrder) {
     logged_by: currentStaff
   });
 }
-
 function resetIssuePanel() {
   issuePhotoFile = null;
   document.getElementById('issue-type').value = '';
@@ -1804,7 +2043,6 @@ function resetIssuePanel() {
   document.getElementById('issue-toggle-btn').style.color = 'var(--text-2)';
   document.getElementById('issue-toggle-btn').style.borderColor = 'var(--border)';
 }
-
 // ---- Partial receipt ----
 function togglePartialPanel() {
   const panel = document.getElementById('partial-panel');
@@ -1812,7 +2050,6 @@ function togglePartialPanel() {
   panel.style.display = isHidden ? 'block' : 'none';
 }
 window.togglePartialPanel = togglePartialPanel;
-
 async function confirmPartial() {
   if (!currentReturn || !currentStaff) return;
   const notes = document.getElementById('partial-notes').value.trim();
@@ -1820,11 +2057,9 @@ async function confirmPartial() {
     alert('Please add a note describing which part was received.');
     return;
   }
-
   const btn = document.querySelector('#partial-panel .scan-btn');
   btn.disabled = true;
   btn.textContent = 'Saving...';
-
   const now = new Date().toISOString();
   await db.from('royal_mail').update({
     received_at: now,
@@ -1833,7 +2068,6 @@ async function confirmPartial() {
     notes: notes,
     status: 'partial'
   }).eq('tracking_number', currentReturn.rm.tracking_number);
-
   btn.disabled = false;
   btn.textContent = 'Saved!';
   setTimeout(() => {
@@ -1845,7 +2079,6 @@ async function confirmPartial() {
   }, 800);
 }
 window.confirmPartial = confirmPartial;
-
 // ---- Manual check flag ----
 async function addToManualChecks() {
   if (!currentReturn) return;
@@ -1863,32 +2096,26 @@ async function addToManualChecks() {
   if (added2) added2.style.display = 'block';
 }
 window.addToManualChecks = addToManualChecks;
-
 // ---- Confirm receipt ----
 async function confirmReceipt() {
   if (!currentReturn || !currentStaff) return;
-
   const allChecked = Array.from(document.querySelectorAll('.rental-item[data-checked="true"]'));
   if (allChecked.length === 0) {
     document.getElementById('confirm-error').textContent = 'Please tick at least one item to confirm receipt.';
     document.getElementById('confirm-error').classList.add('visible');
     return;
   }
-
   // Items confirmed as fully present get cancelled in Supercycle as normal.
   // Items flagged incomplete are NOT touched in Supercycle — they go to the
   // incomplete_receipts sheet for manual review/cancellation instead.
   const completeItems = allChecked.filter(item => item.dataset.incomplete !== 'true');
   const incompleteItems = allChecked.filter(item => item.dataset.incomplete === 'true');
-
   const btn = document.getElementById('confirm-btn');
   btn.disabled = true;
   btn.textContent = 'Logging...';
   document.getElementById('confirm-error').classList.remove('visible');
-
   const now = new Date().toISOString();
   const errors = [];
-
   // Fire Supercycle only for items confirmed complete
   for (const item of completeItems) {
     const rentalId = parseInt(item.dataset.rentalId);
@@ -1901,7 +2128,6 @@ async function confirmReceipt() {
       errors.push(rentalId);
     }
   }
-
   // Log incomplete items to the manual-review sheet instead of cancelling
   if (incompleteItems.length > 0) {
     const rows = incompleteItems.map(item => ({
@@ -1917,7 +2143,6 @@ async function confirmReceipt() {
     try { await db.from('incomplete_receipts').insert(rows); }
     catch(e) { console.error('Failed to log incomplete receipt(s)', e); }
   }
-
   // Write to Supabase regardless (Supercycle errors are non-blocking; the parcel physically arrived)
   try {
     await db.from('royal_mail').update({
@@ -1928,23 +2153,19 @@ async function confirmReceipt() {
   } catch(e) {
     console.error('Supabase write error', e);
   }
-
   // Log issue if one was entered
   const issueType = document.getElementById('issue-type').value;
   if (issueType) {
     try { await logIssue(currentReturn.rm, currentReturn.shopifyOrder); }
     catch(e) { console.warn('Issue log failed:', e); }
   }
-
   const rm = currentReturn.rm;
   const order = currentReturn.shopifyOrder;
   const timeStr = new Date(now).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
   document.getElementById('s-order').textContent = rm.order_number || (order && order.order_name) || '--';
   document.getElementById('s-customer').textContent = rm.customer_name || (order && order.full_name) || '--';
   document.getElementById('s-by').textContent = currentStaff;
   document.getElementById('s-time').textContent = timeStr;
-
   let subText = '';
   if (completeItems.length > 0) {
     subText += completeItems.length + ' item' + (completeItems.length > 1 ? 's' : '') + ' marked received';
@@ -1953,18 +2174,15 @@ async function confirmReceipt() {
     subText += (subText ? ' · ' : '') + incompleteItems.length + ' flagged incomplete — sent for manual review, not cancelled';
   }
   document.getElementById('success-sub').textContent = subText;
-
   if (errors.length > 0) {
     document.getElementById('success-sub').textContent += ' (Supercycle sync failed for ' + errors.length + ' item — please update manually)';
   }
-
   btn.disabled = false;
   btn.textContent = 'Confirm receipt';
   showScreen('success');
   loadRecent();
 }
 window.confirmReceipt = confirmReceipt;
-
 function scanAnother() {
   currentReturn = null;
   otherOrdersLoaded = false;
@@ -1974,7 +2192,6 @@ function scanAnother() {
   showScreen('scan');
 }
 window.scanAnother = scanAnother;
-
 // ---- Tabs ----
 let currentTab = 'log';
 function switchTab(tab) {
@@ -1988,10 +2205,8 @@ function switchTab(tab) {
   if (tab === 'incomplete') loadIncompleteReceipts();
 }
 window.switchTab = switchTab;
-
 // ---- Recent receipts ----
 let allTodayReceipts = [];
-
 async function loadRecent() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -2002,13 +2217,11 @@ async function loadRecent() {
     .not('received_at', 'is', null)
     .order('received_at', { ascending: false })
     .limit(50);
-
   allTodayReceipts = data || [];
   filterToday();
   updateManualBadge();
   updateIncompleteBadge();
 }
-
 function filterToday() {
   const q = (document.getElementById('history-search-today').value || '').toLowerCase();
   const filtered = q ? allTodayReceipts.filter(r =>
@@ -2016,7 +2229,6 @@ function filterToday() {
     (r.customer_name||'').toLowerCase().includes(q) ||
     (r.tracking_number||'').toLowerCase().includes(q)
   ) : allTodayReceipts;
-
   const el = document.getElementById('recent-list');
   if (!filtered.length) { el.innerHTML = '<div class="empty-state">No receipts found</div>'; return; }
   el.innerHTML = filtered.map(r => `
@@ -2035,14 +2247,12 @@ function filterToday() {
   `).join('');
 }
 window.filterToday = filterToday;
-
 function updateManualBadge() {
   const count = allTodayReceipts.filter(r => r.manual_check).length;
   const badge = document.getElementById('manual-count-badge');
   if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
   else { badge.style.display = 'none'; }
 }
-
 async function updateIncompleteBadge() {
   const badge = document.getElementById('incomplete-count-badge');
   try {
@@ -2056,20 +2266,16 @@ async function updateIncompleteBadge() {
     console.warn('Failed to load incomplete receipts count', e);
   }
 }
-
 // ---- Receipt detail ----
 async function openReceiptDetail(trackingNumber) {
   showScreen('receipt');
   document.getElementById('receipt-detail-content').innerHTML = '<div class="spinner" style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin 0.7s linear infinite;margin:48px auto;"></div>';
-
   const { data: rm } = await db
     .from('royal_mail')
     .select('*')
     .eq('tracking_number', trackingNumber)
     .maybeSingle();
-
   if (!rm) { document.getElementById('receipt-detail-content').innerHTML = '<div class="empty-state">Record not found</div>'; return; }
-
   // Try to get rentals from Supercycle for items
   let rentals = [];
   if (rm.order_number) {
@@ -2078,9 +2284,7 @@ async function openReceiptDetail(trackingNumber) {
       rentals = scData.data || [];
     } catch(e) {}
   }
-
   const receivedTime = rm.received_at ? new Date(rm.received_at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '--';
-
   document.getElementById('receipt-detail-content').innerHTML = `
     <div class="confirm-card" style="margin-bottom:16px">
       <div class="confirm-card-header">
@@ -2108,26 +2312,22 @@ async function openReceiptDetail(trackingNumber) {
         </div>
       </div>` : ''}
     </div>
-
     ${rm.manual_check ? `
     <div style="background:var(--amber-light);border:1px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;font-weight:600;color:#92400e;margin-bottom:16px;">
       This return is in Manual Checks — please verify the correct rental was marked as received.
     </div>` : ''}
-
     ${!rm.received_at ? `
     <button class="confirm-btn" onclick="markReceivedFromDetail('${rm.tracking_number}')" id="mark-received-detail-btn">
       Mark as received
     </button>
     <div id="mark-received-done" style="display:none;text-align:center;font-size:14px;color:var(--green);font-weight:600;margin-bottom:12px;">Marked as received</div>
     ` : ''}
-
     ${rm.manual_check ? `
     <button class="other-orders-btn" onclick="resolveManualCheck('${rm.tracking_number}')" id="resolve-manual-btn" style="border-color:var(--green);color:var(--green);margin-top:8px;">
       Remove from Manual Checks
     </button>
     <div id="resolve-manual-done" style="display:none;text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-top:6px;">Removed from Manual Checks</div>
     ` : ''}
-
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;">
       <div class="field-label" style="margin-bottom:8px">Notes</div>
       <textarea id="receipt-notes" style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;min-height:80px;color:var(--text);background:var(--surface);" placeholder="Add notes about this return...">${rm.notes || ''}</textarea>
@@ -2137,16 +2337,13 @@ async function openReceiptDetail(trackingNumber) {
   `;
 }
 window.openReceiptDetail = openReceiptDetail;
-
 async function markReceivedFromDetail(trackingNumber) {
   if (!currentStaff) { alert('Please select your name first'); return; }
   const btn = document.getElementById('mark-received-detail-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Marking...'; }
   const now = new Date().toISOString();
-
   // Get the order number to look up Supercycle rentals
   const { data: rm } = await db.from('royal_mail').select('order_number').eq('tracking_number', trackingNumber).maybeSingle();
-
   // Fire Supercycle for each active rental on this order — but skip
   // multi-part products, since there's no checklist here to confirm the
   // full item is present. Those get flagged to the incomplete sheet instead.
@@ -2178,21 +2375,18 @@ async function markReceivedFromDetail(trackingNumber) {
       }
     } catch(e) { console.warn('Supercycle lookup failed', e); }
   }
-
   await db.from('royal_mail').update({
     received_at: now,
     received_by: currentStaff,
     status: 'received',
     receipt_status: 'received'
   }).eq('tracking_number', trackingNumber);
-
   if (btn) btn.style.display = 'none';
   const done = document.getElementById('mark-received-done');
   if (done) done.style.display = 'block';
   loadRecent();
 }
 window.markReceivedFromDetail = markReceivedFromDetail;
-
 async function resolveManualCheck(trackingNumber) {
   const btn = document.getElementById('resolve-manual-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Removing...'; }
@@ -2204,7 +2398,6 @@ async function resolveManualCheck(trackingNumber) {
   updateManualBadge();
 }
 window.resolveManualCheck = resolveManualCheck;
-
 async function saveReceiptNotes(trackingNumber) {
   const notes = document.getElementById('receipt-notes').value.trim();
   await db.from('royal_mail').update({ notes }).eq('tracking_number', trackingNumber);
@@ -2215,34 +2408,27 @@ async function saveReceiptNotes(trackingNumber) {
   if (r) r.notes = notes;
 }
 window.saveReceiptNotes = saveReceiptNotes;
-
 function goBackFromReceipt() {
   showScreen('scan');
   loadRecent();
 }
 window.goBackFromReceipt = goBackFromReceipt;
-
 // ---- History tab ----
 async function loadHistory() {
   const q = (document.getElementById('hist-search').value || '').trim().toLowerCase();
-  const date = document.getElementById('hist-date').value;
   const day = document.getElementById('hist-day') ? document.getElementById('hist-day').value : '';
   const month = document.getElementById('hist-month') ? document.getElementById('hist-month').value : '';
   const year = document.getElementById('hist-year') ? document.getElementById('hist-year').value : '';
   const hasDate = day && month && year;
   if (!q && !hasDate) { document.getElementById('history-list').innerHTML = '<div class="empty-state">Enter a search term or date above</div>'; return; }
-
   let query = db.from('royal_mail').select('tracking_number, order_number, customer_name, customer_email, received_at, received_by, notes, manual_check').not('received_at', 'is', null).order('received_at', { ascending: false }).limit(100);
-
-  if (day && month && year) {
+  if (hasDate) {
     const start = new Date(`${year}-${month}-${day}T00:00:00`);
     const end = new Date(`${year}-${month}-${day}T23:59:59`);
     query = query.gte('received_at', start.toISOString()).lte('received_at', end.toISOString());
   }
-
   const { data } = await query;
   let results = data || [];
-
   if (q) {
     results = results.filter(r =>
       (r.order_number||'').toLowerCase().includes(q) ||
@@ -2251,7 +2437,6 @@ async function loadHistory() {
       (r.tracking_number||'').toLowerCase().includes(q)
     );
   }
-
   const el = document.getElementById('history-list');
   if (!results.length) { el.innerHTML = '<div class="empty-state">No results found</div>'; return; }
   el.innerHTML = results.map(r => `
@@ -2270,7 +2455,6 @@ async function loadHistory() {
   `).join('');
 }
 window.loadHistory = loadHistory;
-
 // ---- Manual checks tab ----
 async function loadManualChecks() {
   const { data } = await db
@@ -2278,7 +2462,6 @@ async function loadManualChecks() {
     .select('tracking_number, order_number, customer_name, received_at, received_by, notes')
     .eq('manual_check', true)
     .order('received_at', { ascending: false, nullsFirst: false });
-
   const el = document.getElementById('manual-list');
   if (!data || !data.length) { el.innerHTML = '<div class="empty-state">No items in manual checks</div>'; return; }
   el.innerHTML = data.map(r => `
@@ -2297,7 +2480,6 @@ async function loadManualChecks() {
   `).join('');
 }
 window.loadManualChecks = loadManualChecks;
-
 // ---- Incomplete receipts tab ----
 async function loadIncompleteReceipts() {
   const { data } = await db
@@ -2305,7 +2487,6 @@ async function loadIncompleteReceipts() {
     .select('id, tracking_number, order_number, product_title, variant_title, missing_notes, flagged_by, flagged_at')
     .eq('resolved', false)
     .order('flagged_at', { ascending: false });
-
   const el = document.getElementById('incomplete-list');
   if (!data || !data.length) { el.innerHTML = '<div class="empty-state">No incomplete returns flagged</div>'; return; }
   el.innerHTML = data.map(r => `
@@ -2325,7 +2506,6 @@ async function loadIncompleteReceipts() {
   `).join('');
 }
 window.loadIncompleteReceipts = loadIncompleteReceipts;
-
 async function resolveIncompleteReceipt(id) {
   if (!currentStaff) { alert('Please select your name first'); return; }
   await db.from('incomplete_receipts').update({
@@ -2337,7 +2517,6 @@ async function resolveIncompleteReceipt(id) {
   updateIncompleteBadge();
 }
 window.resolveIncompleteReceipt = resolveIncompleteReceipt;
-
 // ---- Loading ----
 function showLoading(text) {
   document.getElementById('loading-text').textContent = text || 'Loading...';
@@ -2346,7 +2525,6 @@ function showLoading(text) {
 function hideLoading() {
   document.getElementById('loading').classList.remove('visible');
 }
-
 })();
 </script>
 </body>
