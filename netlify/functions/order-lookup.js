@@ -150,6 +150,19 @@ function validEmail(e) {
   return s.length > 3 && s.length < 200 && s.includes('@');
 }
 
+// An order number on a return is only trusted if the order it points to also belongs to the
+// same customer. Royal Mail / Supercycle numbers like "#14430" are NOT Shopify order numbers,
+// and "B-14430" is a real but unrelated order. Same email, or same name, is required.
+const normName = n => String(n || '').toLowerCase().replace(/\s+/g, ' ').trim();
+function sameCustomer(order, email, name) {
+  const e = String(email || '').trim().toLowerCase();
+  const n = normName(name);
+  if (!validEmail(e) && !n) return true; // nothing to check against
+  if (validEmail(e) && String(order.customer_email || '').trim().toLowerCase() === e) return true;
+  if (n && (normName(order.shipping_name) === n || normName(order.customer_name) === n)) return true;
+  return false;
+}
+
 // A name is only safe to put in an ilike filter if it has no wildcard / syntax characters.
 function cleanName(n) {
   const s = String(n || '').trim().replace(/\s+/g, ' ');
@@ -199,7 +212,8 @@ async function matchBatch(rows) {
     for (const o of found) (byName[o.name] = byName[o.name] || []).push(o);
     rows.forEach((r, i) => {
       for (const c of rowCands[i]) {
-        if (byName[c] && byName[c].length) { chosen[r.k] = { order: byName[c][0], mt: 'matched' }; break; }
+        const hit = byName[c] && byName[c].find(o => sameCustomer(o, r.e, r.n));
+        if (hit) { chosen[r.k] = { order: hit, mt: 'matched' }; break; }
       }
     });
   }
@@ -286,8 +300,11 @@ exports.handler = async (event) => {
       const rows = await rest(
         `sales_orders?select=${ORDER_FIELDS}&name=in.(${inList(cands)})&id=gt.1000000&order=id.desc&limit=10`
       );
+      // If the caller says who the customer is, only accept an order that belongs to them.
+      const email = String(payload.email || '').trim();
+      const custName = String(payload.name || '').trim();
       for (const c of cands) {
-        const hit = rows.find(r => r.name === c);
+        const hit = rows.find(r => r.name === c && sameCustomer(r, email, custName));
         if (hit) return json(event, 200, { data: shape(hit) });
       }
       return json(event, 200, { data: null });
