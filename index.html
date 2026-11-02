@@ -1695,7 +1695,7 @@ async function lookupTracking(raw) {
     const normRm = normaliseOrder(rm.order_number);
     const [erpResult, scByOrderResult] = await Promise.all([
       // ERP: try exact order number first
-      orderLookup('byOrderNumber', { orderNumber: rm.order_number })
+      orderLookup('byOrderNumber', { orderNumber: rm.order_number, email: rm.customer_email, name: rm.customer_name })
         .catch(e => { console.error(e); return null; }),
       // Supercycle: search by order name in parallel
       supercycle('getRentals', { orderName: rm.order_number }).catch(() => null)
